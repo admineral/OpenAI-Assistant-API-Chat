@@ -17,7 +17,7 @@ export default function Chat() {
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, input, setInput, handleSubmit, isLoading, append } = useChat({
+  const { messages, input, setInput, handleSubmit, isLoading} = useChat({
   
     onError: (error) => {
       va.track("Chat errored", {
@@ -38,36 +38,63 @@ export default function Chat() {
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-  
-    // Call the handleSubmit function provided by the useChat hook
-    await handleSubmit(e);
+    console.log('Function called -- handleFormSubmit');
 
-    setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: input }]);
+    // Add the user's message to the chat
+    setChatMessages(prevMessages => [
+      ...prevMessages,
+      { role: 'user', content: input }
+
+    ]);
+    setInput('');
+    console.log('Message field cleared -- handleFormSubmit');
+  
   
     // Send a POST request to the backend
+    console.log('Send a POST request to the backend -- handleFormSubmit');
+
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ inputmessage: input }),
+      body: JSON.stringify({ input }),
     });
   
     const data = await response.json();
-  
+
+    console.log('Send a POST request to the backend DONE -- handleFormSubmit ');
+
     if (response.ok) {
       // Handle successful response
-      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: data.response }]);
+      console.log('Successful response -- handleFormSubmit ');
+    
+      setChatMessages(prevMessages => [
+          ...prevMessages,
+          { role: 'assistant', content: data.response }
+        ]);
+    
+      console.log('Added "user" and "Assistant" message to the chat -- handleFormSubmit ');
     } else {
       // Handle error
       console.error('Error:', data.error);
     }
   
-    // Clear the input field
-    setInput('');
+    
   };
+
+
+
   async function startAssistant() {
+    console.log('Start-Assistant - Name :', assistantName);
+    console.log('Start-Assistant - Model:', assistantModel);
+    console.log('Start-Assistant - Description:', assistantDescription);
+    console.log('Start-Assistant - Initial-Message:', inputmessage);
+    
     setIsButtonDisabled(true);
+    console.log('Button Disabled (true)  -- startAssistant');
+
+    console.log('Send a POST request to the backend -- startAssistant ');
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {
@@ -80,22 +107,34 @@ export default function Chat() {
         inputmessage,
       }),
     });
+
+    console.log('Send a POST request to the backend DONE -- startAssistant ');
   
     const data = await response.json();
   
     if (response.ok) {
       setIsButtonDisabled(false);
-      console.log('Assistant ID:', data.assistantId);
-  
+      console.log('Button disabled (false) -- startAssistant');
+
+      // Add the first message to the chat
+      setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: inputmessage }]);
+      console.log('Added the first user message to the chat -- startAssistant ');
+      
       // Add the assistant's response to your chat messages
       setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: data.response }]);
-  
+      console.log('Added the assistant response to your chat messages -- startAssistant ');
+      
+      
       setChatStarted(true);
+      console.log('setChatStarted (true) -- startAssistant ');
     } else {
       console.error('Error:', data.error);
       setIsButtonDisabled(false);
     }
   }
+
+
+  
 
   return (
     <main className="flex flex-col items-center justify-between pb-40">
@@ -211,6 +250,7 @@ export default function Chat() {
         <form
           ref={formRef}
           onSubmit={handleFormSubmit}
+          
           className="relative w-full max-w-screen-md rounded-xl border border-gray-200 bg-white px-4 pb-2 pt-3 shadow-lg sm:pb-3 sm:pt-4"
         >
           <Textarea
