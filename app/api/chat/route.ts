@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
           .map(contentItem => (contentItem as any).text.value),
       })));
 
-      // A bunch of boring safety checks
+      
             // A bunch of boring safety checks
             const lastMessage = messages.data.at(0);
             if (!lastMessage) {
@@ -133,10 +133,3 @@ export async function POST(req: NextRequest) {
         }
       };
       
-      export default function handler(req: NextRequest, res: NextResponse) {
-        if (req.method === 'POST') {
-          return POST(req);
-        } else {
-          return NextResponse.json({ error: 'Method not allowed' });
-        }
-      }
