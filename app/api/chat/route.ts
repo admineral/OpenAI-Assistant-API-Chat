@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
       const assistant = await openai.beta.assistants.create({
         name: assistantName,
         instructions: assistantDescription,
-        model: assistantModel,
+        model: "gpt-4-1106-preview",
         tools: [{ "type": "retrieval" }],
       });
       console.log('Created assistant with Id:', assistant.id);
@@ -96,8 +96,8 @@ export async function POST(req: NextRequest) {
 
       // A bunch of boring safety checks
       const lastMessage = messages.data.at(0);
-      if (lastMessage?.role !== "assistant") {
-        return NextResponse.json({ error: "Last message not from the assistant" });
+      if (!lastMessage) {
+        return NextResponse.json({ error: "No last message found" });
       }
 
       const assistantMessageContent = lastMessage.content.at(0);
@@ -110,10 +110,14 @@ export async function POST(req: NextRequest) {
       }
 
       // Return the assistant's response
-      return NextResponse.json({ assistantId: assistant.id });
+      return NextResponse.json({ response: assistantMessageContent.text.value });
     } catch (error) {
-      console.error('Error:', error);
-      return NextResponse.json({ error: 'An error occurred while creating the assistant' });
-    }
-  }
+      if (error instanceof Error) {
+        console.error('Error:', error);
+        return NextResponse.json({ error: error.message });
+      } else {
+        console.error('Unknown error:', error);
+        return NextResponse.json({ error: 'An unknown error occurred' });
+      }
+    }}
 };

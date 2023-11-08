@@ -11,15 +11,13 @@ import remarkGfm from "remark-gfm";
 import Textarea from "react-textarea-autosize";
 import { toast } from "sonner";
 
-const examples = [
-  "Summarize my document",
-];
+
 
 export default function Chat() {
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, input, setInput, handleSubmit, isLoading } = useChat({
+  const { messages, input, setInput, handleSubmit, isLoading, append } = useChat({
   
     onError: (error) => {
       va.track("Chat errored", {
@@ -34,7 +32,8 @@ export default function Chat() {
   const [assistantModel, setAssistantModel] = useState('');
   const [assistantDescription, setAssistantDescription] = useState('');
   const [inputmessage, setInputmessage] = useState('');
-
+  const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
+  const [chatStarted, setChatStarted] = useState(false);
 
   async function startAssistant() {
     const response = await fetch('/api/chat', {
@@ -51,14 +50,20 @@ export default function Chat() {
     });
   
     const data = await response.json();
-
+  
     if (response.ok) {
       console.log('Assistant ID:', data.assistantId);
+  
+      // Add the assistant's response to your chat messages
+      // This depends on how you can add a new message to your chat messages
+      //append({ role: 'assistant', content: data.response });
+      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: data.response }]);
+  
+      setChatStarted(true);
     } else {
       console.error('Error:', data.error);
     }
   }
-
 
   return (
     <main className="flex flex-col items-center justify-between pb-40">
@@ -78,8 +83,8 @@ export default function Chat() {
           <GithubIcon />
         </a>
       </div>
-      {messages.length > 0 ? (
-        messages.map((message, i) => (
+      {chatMessages.length > 0 ? (
+        chatMessages.map((message, i) => (
           <div
             key={i}
             className={clsx(
