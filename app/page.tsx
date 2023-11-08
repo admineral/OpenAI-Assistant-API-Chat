@@ -29,13 +29,46 @@ export default function Chat() {
 
   const disabled = isLoading || input.length === 0;
   const [assistantName, setAssistantName] = useState('');
-  const [assistantModel, setAssistantModel] = useState('');
+  const [assistantModel, setAssistantModel] = useState('gpt-4-1106-preview');
   const [assistantDescription, setAssistantDescription] = useState('');
   const [inputmessage, setInputmessage] = useState('');
   const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
   const [chatStarted, setChatStarted] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+  
+    // Call the handleSubmit function provided by the useChat hook
+    await handleSubmit(e);
+
+    setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: input }]);
+  
+    // Send a POST request to the backend
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ inputmessage: input }),
+    });
+  
+    const data = await response.json();
+  
+    if (response.ok) {
+      // Handle successful response
+      // For example, you can add the assistant's response to the chat messages
+      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: data.response }]);
+    } else {
+      // Handle error
+      console.error('Error:', data.error);
+    }
+  
+    // Clear the input field
+    setInput('');
+  };
   async function startAssistant() {
+    setIsButtonDisabled(true);
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {
@@ -52,6 +85,7 @@ export default function Chat() {
     const data = await response.json();
   
     if (response.ok) {
+      setIsButtonDisabled(false);
       console.log('Assistant ID:', data.assistantId);
   
       // Add the assistant's response to your chat messages
@@ -62,6 +96,7 @@ export default function Chat() {
       setChatStarted(true);
     } else {
       console.error('Error:', data.error);
+      setIsButtonDisabled(false);
     }
   }
 
@@ -144,8 +179,8 @@ export default function Chat() {
                 className="p-2 border border-gray-200 rounded-md"
               >
                 <option value="">Select Assistant Model</option>
-                <option value="gpt-4-1106-preview">GPT-4-1106-Preview</option>
-                <option value="gpt-3.5-turbo-1106">GPT-3.5-Turbo-1106</option>
+                <option value="gpt-4-1106-preview">GPT-4</option>
+                <option value="gpt-3.5-turbo-1106">GPT-3.5</option>
               </select>
               <input
                 type="text"
@@ -166,7 +201,8 @@ export default function Chat() {
             <button
               type="button"
               onClick={startAssistant}
-              className="p-2 bg-green-500 text-white rounded-md"
+              disabled={isButtonDisabled}
+              className={`p-2 rounded-md ${isButtonDisabled ? 'bg-gray-500 text-gray-300' : 'bg-green-500 text-white'}`}
             >
               Start
             </button>
@@ -177,7 +213,7 @@ export default function Chat() {
       <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
         <form
           ref={formRef}
-          onSubmit={handleSubmit}
+          onSubmit={handleFormSubmit}
           className="relative w-full max-w-screen-md rounded-xl border border-gray-200 bg-white px-4 pb-2 pt-3 shadow-lg sm:pb-3 sm:pt-4"
         >
           <Textarea
