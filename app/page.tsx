@@ -36,7 +36,7 @@ export default function Chat() {
   const [chatStarted, setChatStarted] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
-  const handleFormSubmit = async (e) => {
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   
     // Call the handleSubmit function provided by the useChat hook
@@ -57,7 +57,6 @@ export default function Chat() {
   
     if (response.ok) {
       // Handle successful response
-      // For example, you can add the assistant's response to the chat messages
       setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: data.response }]);
     } else {
       // Handle error
@@ -89,8 +88,6 @@ export default function Chat() {
       console.log('Assistant ID:', data.assistantId);
   
       // Add the assistant's response to your chat messages
-      // This depends on how you can add a new message to your chat messages
-      //append({ role: 'assistant', content: data.response });
       setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: data.response }]);
   
       setChatStarted(true);
