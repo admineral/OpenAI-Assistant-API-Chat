@@ -1,6 +1,7 @@
 "use client";
 
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFileUpload } from '@fortawesome/free-solid-svg-icons'
 import { useRef, useState } from "react";
 import { useChat } from "ai/react";
 import va from "@vercel/analytics";
@@ -39,10 +40,29 @@ export default function Chat() {
   const [file, setFile] = useState<File>();
   const [assistantId, setAssistantId] = useState<string | null>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
- 
+  const [dragOver, setDragOver] = useState(false);
+  const handleFileChange = (selectedFile: File) => {
+    setFile(selectedFile);
+  };
   
 
-
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    setDragOver(true);
+  };
+  
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
+  
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    setDragOver(false);
+    const files = event.dataTransfer.files;
+    if (files.length) {
+      setFile(files[0]);
+    }
+  };
 
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -260,7 +280,7 @@ export default function Chat() {
         <div className="border-gray-200sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border sm:w-full">
           <div className="flex flex-col space-y-4 p-7 sm:p-10">
             <h1 className="text-lg font-semibold text-black">
-              Welcome to Agentus!
+              Welcome to Agent42!
             </h1>
             <form
               className="flex flex-col space-y-3"
@@ -282,21 +302,53 @@ export default function Chat() {
                 required
                 className="p-2 border border-gray-200 rounded-md"
               />
-              <select
-                value={assistantModel}
-                onChange={(e) => setAssistantModel(e.target.value)}
-                required
-                className="p-2 border border-gray-200 rounded-md"
-              >
-                <option value="gpt-4-1106-preview">GPT-4</option>
-                <option value="gpt-3.5-turbo-1106">GPT-3.5</option>
-              </select>
-            <input
-                type="file"
+              <div>
+                <button
+                  onClick={() => setAssistantModel('gpt-4-1106-preview')}
+                  className={`p-2 border border-gray-200 rounded-md ${assistantModel === 'gpt-4-1106-preview' ? 'bg-green-500 text-white' : ''}`}
+                >
+                  GPT-4
+                </button>
+                <button
+                  onClick={() => setAssistantModel('gpt-3.5-turbo-1106')}
+                  className={`p-2 border border-gray-200 rounded-md ${assistantModel === 'gpt-3.5-turbo-1106' ? 'bg-green-500 text-white' : ''}`}
+                >
+                  GPT-3.5
+                </button>
+              </div>
+              <div 
+                className={`drop-area border-2 border-dashed border-gray-400 rounded-md p-4 text-center ${dragOver ? 'bg-gray-100' : ''}`}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onClick={() => {
+                  const fileInput = document.getElementById('file-input');
+                  if (fileInput) {
+                    fileInput.click();
+                  }
+              }}
+            >
+              <input 
                 id="file-input"
-                onChange={(e) => setFile(e.target.files?.[0])}
-                className="p-2 border border-gray-200 rounded-md"
+                type="file" 
+                onChange={(e) => {
+                  if (e.target.files) {
+                    handleFileChange(e.target.files[0]);
+                  }
+                }} 
+                style={{ display: 'none' }} 
               />
+              {file ? (
+                <>
+                  <FontAwesomeIcon icon={faFileUpload} className="text-green-500 mb-2" />
+                  
+                  <p className="text-gray-700 text-lg font-bold">{file.name}</p>
+                  <i className="fas fa-file-upload text-green-500"></i>  
+                </>
+              ) : (
+                <p className="text-gray-500">Drag and drop or click to select a file.</p>
+              )}
+            </div>
             <button
               type="button"
               onClick={startAssistant}
