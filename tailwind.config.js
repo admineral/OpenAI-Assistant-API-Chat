@@ -5,5 +5,15 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  theme: {
+    extend: {
+      colors: {
+        'space-grey': {
+          light: '#ededed' // Replace this with the hex code for light space-grey you prefer
+        },
+      },
+    },
+  },
   plugins: [require("@tailwindcss/typography")],
 };
+
