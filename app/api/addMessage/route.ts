@@ -1,8 +1,16 @@
-// app/api/addMessage/route.ts
-
-// This file defines the API route for adding a new message to a thread using
-// the OpenAI API. It is designed to handle POST requests, taking 'threadId' and
-// 'input' from the form data to create a new message in the specified thread.
+/**
+ * API Route - Add Message to Thread
+ *
+ * This route provides the functionality to add new messages to a specific
+ * thread via the OpenAI API. It is designed to handle POST requests, where
+ * it receives 'threadId' and 'input' within the form data. The 'threadId'
+ * identifies the target conversation thread, while 'input' contains the
+ * message content to be added. This route plays a crucial role in facilitating
+ * dynamic interactions within AI-powered threads, allowing users to continue
+ * conversations or add new queries and instructions.
+ *
+ * Path: /api/addMessage
+ */
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from "openai";

@@ -1,9 +1,18 @@
-// app/api/checkRunStatus/route.ts
-
-// This file contains the API route for checking the status of a run in a 
-// specific thread using the OpenAI API. It handles POST requests, expecting 
-// 'threadId' and 'runId' in the form data, uses them to fetch the status of 
-// a run via OpenAI, and returns this status as a JSON response.
+/**
+ * API Route - Check Run Status
+ *
+ * This route is designed to check the status of a specific run in a thread
+ * using the OpenAI API. It accepts POST requests containing 'threadId' and
+ * 'runId' in the form data. The route then queries the OpenAI API to retrieve
+ * the current status of the specified run. This information is crucial for
+ * understanding the state of an ongoing interaction with an AI assistant,
+ * such as whether the interaction is completed, ongoing, or has encountered
+ * any issues. The status of the run is returned as a JSON response, providing
+ * a simple and effective way for client applications to monitor and react to
+ * the progress of AI-assisted conversations or tasks.
+ *
+ * Path: /api/checkRunStatus
+ */
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from "openai";
