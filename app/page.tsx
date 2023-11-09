@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useRef, useState } from "react";
 import { useChat } from "ai/react";
 import va from "@vercel/analytics";
@@ -36,8 +37,11 @@ export default function Chat() {
   const [chatStarted, setChatStarted] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [file, setFile] = useState<File>();
-
+  const [assistantId, setAssistantId] = useState<string | null>(null);
+  const [threadId, setThreadId] = useState<string | null>(null);
   
+
+
 
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -55,24 +59,25 @@ export default function Chat() {
     // Send a POST request to the backend
     console.log('Send a POST request to the backend -- handleFormSubmit');
   
-    // Create a FormData object
-    const data = new FormData();
-    // Append the input message to it
-    data.set('input', input);
-    // Append the inputmessage to it
-    data.set('inputmessage', inputmessage);
-  
-    // Call the chat API instead of the upload API
-    const response = await fetch('/api/chat', {
+    const chatData = new FormData();
+    if (assistantId) {
+      chatData.set('assistantId', assistantId);
+    }
+    if (threadId) {
+      chatData.set('threadId', threadId);
+    }
+    chatData.set('input', input);
+
+    const chatResponse = await fetch('/api/chat', {
       method: 'POST',
-      body: data,
+      body: chatData,
     });
   
-    const responseData = await response.json();
+    const responseData = await chatResponse.json();
   
     console.log('Send a POST request to the backend DONE -- handleFormSubmit ');
   
-    if (response.ok) {
+    if (chatResponse.ok) {
       // Handle successful response
       console.log('Successful response -- handleFormSubmit ');
   
@@ -129,8 +134,10 @@ export default function Chat() {
 
     // Get the file ID from the response
     const fileId = uploadData.fileId;
+    console.log('File ID (page):', fileId);
+     
 
-    console.log('File-ID: ', fileId);
+    
 
 
     const chatData = new FormData();
@@ -138,28 +145,38 @@ export default function Chat() {
     chatData.set('assistantModel', assistantModel);
     chatData.set('assistantDescription', assistantDescription);
     chatData.set('inputmessage', inputmessage);
-    chatData.set('input', input);
-    if (fileId) {
-      chatData.set('fileId', fileId);
+    if (file) {
+      chatData.set('file', file);
     }
-
-    const chatResponse = await fetch('/api/chat', {
+    chatData.set('fileId', fileId);
+    console.log('calling the startChat - API - ROUTE');
+    const startChatResponse = await fetch('/api/startChat', {
       method: 'POST',
       body: chatData,
-    }).catch(error => {
-      console.error('Fetch error:', error);
-      return null; // return null instead of undefined
     });
-    if (!chatResponse) {
-      console.error('No response received');
+    console.log('CALLED/DONE the startChat - API - ROUTE');
+    
+    // Log the raw response
+    console.log('Raw startChatResponse:', startChatResponse);
+    
+
+    if (!startChatResponse.ok) {
+      console.error('Error starting chat');
       return;
     }
 
     console.log('Send a POST request to the backend DONE -- startAssistant ');
   
-    const data = await chatResponse.json();
-  
-    if (chatResponse.ok) {
+    const startChatData = await startChatResponse.json();
+    console.log('startChatData:', startChatData);
+    
+
+    if (startChatResponse.ok) {
+      setAssistantId(startChatData.assistantId);
+      setThreadId(startChatData.threadId);
+      console.log(assistantId);
+      console.log(threadId);
+
       setIsButtonDisabled(false);
       console.log('Button disabled (false) -- startAssistant');
 
@@ -168,14 +185,14 @@ export default function Chat() {
       console.log('Added the first user message to the chat -- startAssistant ');
       
       // Add the assistant's response to your chat messages
-      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: data.response }]);
+      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: startChatData.response }]);
       console.log('Added the assistant response to your chat messages -- startAssistant ');
       
       
       setChatStarted(true);
       console.log('setChatStarted (true) -- startAssistant ');
     } else {
-      console.error('Error:', data.error);
+      console.error('Error:', startChatData.error);
       setIsButtonDisabled(false);
     }
   }
