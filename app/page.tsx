@@ -37,7 +37,18 @@ export default function Chat() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [file, setFile] = useState<File>();
 
+  const handleFileDrop = (e) => {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      setFile(files[0]);
+    }
+  };
 
+  // Function to handle file drag over
+  const handleFileDragOver = (e) => {
+    e.preventDefault();
+  };
 
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -280,12 +291,20 @@ export default function Chat() {
                 required
                 className="p-2 border border-gray-200 rounded-md"
               />
-            <input
+            <label
+              className="p-2 border border-gray-200 rounded-md cursor-pointer"
+              style={{ minHeight: '50px', lineHeight: '50px', textAlign: 'center' }}
+              onDrop={handleFileDrop}
+              onDragOver={handleFileDragOver}
+            >
+              {file ? file.name : 'Drag and drop a file here or click to select'}
+              <input
                 type="file"
                 id="file-input"
                 onChange={(e) => setFile(e.target.files?.[0])}
-                className="p-2 border border-gray-200 rounded-md"
+                style={{ display: 'none' }}
               />
+            </label>
             <button
               type="button"
               onClick={startAssistant}
