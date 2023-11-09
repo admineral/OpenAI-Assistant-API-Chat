@@ -332,7 +332,7 @@ export default function Chat() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === "Enter" && !e.shiftKey && chatStarted) {
                 formRef.current?.requestSubmit();
                 e.preventDefault();
               }
@@ -343,11 +343,11 @@ export default function Chat() {
           <button
             className={clsx(
               "absolute inset-y-0 right-3 my-auto flex h-8 w-8 items-center justify-center rounded-md transition-all",
-              disabled
+              disabled || !chatStarted
                 ? "cursor-not-allowed bg-white"
                 : "bg-green-500 hover:bg-green-600",
             )}
-            disabled={disabled}
+            disabled={disabled || !chatStarted}
           >
             {isLoading ? (
               <LoadingCircle />
