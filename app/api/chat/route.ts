@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       if (!assistantMessageContent) {
         return NextResponse.json({ error: "No assistant message found" });
       }
-      console.log('Assistant response:', assistantMessageContent.text.value);
+      //console.log('Assistant response:', assistantMessageContent.text.value);
 
       if (assistantMessageContent.type !== "text") {
         return NextResponse.json({ error: "Assistant message is not text, only text supported in this demo" });
