@@ -48,6 +48,9 @@ export default function Chat() {
   const [file, setFile] = useState<File>();
   const [assistantId, setAssistantId] = useState<string | null>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
+  const [isStartLoading, setStartLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  
   
   // Handler for file input changes
   const handleFileChange = (selectedFile: File) => {
@@ -58,7 +61,8 @@ export default function Chat() {
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('Handling form submission.');
-
+    
+    setIsSending(true);
     // Update chat messages with user input
     setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: input }]);
     setInput('');
@@ -132,7 +136,7 @@ export default function Chat() {
     });
     const listMessagesData = await listMessagesResponse.json();
     console.log('Messages retrieved from listMessages API endpoint.');
-
+    setIsSending(false);
     // Update chat with the assistant's response
     if (listMessagesResponse.ok) {
       const lastMessage = listMessagesData.messages[0];
@@ -149,7 +153,13 @@ export default function Chat() {
 
   // Function to initialize the chat assistant
   async function startAssistant() {
+    // Check if all fields are filled
+    if (!assistantName || !assistantDescription) {
+      console.error('All fields must be filled');
+      return;
+    }
     console.log('Initializing chat assistant.');
+    setStartLoading(true);
     setIsButtonDisabled(true);
 
     // Preparing file data for upload
@@ -269,7 +279,7 @@ export default function Chat() {
           </div>
         ))
       ) : (
-        <div className="border-gray-500 bg-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border-2 sm:w-full">
+          <div className="border-gray-500 bg-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border-2 sm:w-full">
           <div className="flex flex-col space-y-4 p-7 sm:p-10">
             <h1 className="text-lg font-semibold text-black">
               Welcome to Agent42!
@@ -285,7 +295,7 @@ export default function Chat() {
                 required
                 className="p-2 border border-gray-200 rounded-md"
               />
-
+        
               <input
                 type="text"
                 placeholder="Assistant Description"
@@ -297,13 +307,13 @@ export default function Chat() {
               <div>
                 <button
                   onClick={() => setAssistantModel('gpt-4-1106-preview')}
-                  className={`p-2 border border-gray-200 rounded-md ${assistantModel === 'gpt-4-1106-preview' ? 'bg-green-500 text-white' : ''}`}
+                  className={`p-1 border border-gray-400 rounded-md ${assistantModel === 'gpt-4-1106-preview' ? 'bg-blue-500 text-white' : ''}`}
                 >
                   GPT-4
                 </button>
                 <button
                   onClick={() => setAssistantModel('gpt-3.5-turbo-1106')}
-                  className={`p-2 border border-gray-200 rounded-md ${assistantModel === 'gpt-3.5-turbo-1106' ? 'bg-green-500 text-white' : ''}`}
+                  className={`p-1 border border-gray-400 rounded-md ${assistantModel === 'gpt-3.5-turbo-1106' ? 'bg-blue-500 text-white' : ''}`}
                 >
                   GPT-3.5
                 </button>
@@ -320,11 +330,13 @@ export default function Chat() {
               <input 
                 id="file-input"
                 type="file" 
+                accept=".c,.cpp,.csv,.docx,.html,.java,.json,.md,.pdf,.pptx,.txt,.tex"
                 onChange={(e) => {
                   if (e.target.files) {
                     handleFileChange(e.target.files[0]);
                   }
                 }} 
+                required
                 style={{ display: 'none' }} 
               />
               {file ? (
@@ -340,10 +352,10 @@ export default function Chat() {
             <button
               type="button"
               onClick={startAssistant}
-              disabled={isButtonDisabled}
-              className={`p-2 rounded-md ${isButtonDisabled ? 'bg-gray-500 text-gray-300' : 'bg-green-500 text-white'}`}
+              disabled={isButtonDisabled || !assistantName || !assistantDescription || !file}
+              className={`p-2 rounded-md flex justify-center items-center ${isButtonDisabled ? 'bg-gray-500 text-gray-300' : 'bg-green-500 text-white'}`}
             >
-              Start
+              {isStartLoading ? <LoadingCircle /> : "Start"}
             </button>
             </form>
           </div>
@@ -383,7 +395,7 @@ export default function Chat() {
             )}
             disabled={disabled || !chatStarted}
           >
-            {isLoading ? (
+            {isSending ? (
               <LoadingCircle />
             ) : (
               <SendIcon
