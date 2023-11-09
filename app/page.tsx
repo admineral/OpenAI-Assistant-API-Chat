@@ -12,6 +12,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Textarea from "react-textarea-autosize";
 import { toast } from "sonner";
+import { useDropzone } from 'react-dropzone';
 
 
 
@@ -40,29 +41,12 @@ export default function Chat() {
   const [file, setFile] = useState<File>();
   const [assistantId, setAssistantId] = useState<string | null>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
-  const [dragOver, setDragOver] = useState(false);
+  
   const handleFileChange = (selectedFile: File) => {
     setFile(selectedFile);
   };
   
 
-  const handleDragOver = (event: React.DragEvent) => {
-    event.preventDefault();
-    setDragOver(true);
-  };
-  
-  const handleDragLeave = () => {
-    setDragOver(false);
-  };
-  
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault();
-    setDragOver(false);
-    const files = event.dataTransfer.files;
-    if (files.length) {
-      setFile(files[0]);
-    }
-  };
 
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -317,15 +301,12 @@ export default function Chat() {
                 </button>
               </div>
               <div 
-                className={`drop-area border-2 border-dashed border-gray-400 rounded-md p-4 text-center ${dragOver ? 'bg-gray-100' : ''}`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={() => {
-                  const fileInput = document.getElementById('file-input');
-                  if (fileInput) {
-                    fileInput.click();
-                  }
+              className="drop-area border-2 border-dashed border-gray-400 rounded-md p-4 text-center"
+              onClick={() => {
+                const fileInput = document.getElementById('file-input');
+                if (fileInput) {
+                  fileInput.click();
+                }
               }}
             >
               <input 
@@ -341,12 +322,11 @@ export default function Chat() {
               {file ? (
                 <>
                   <FontAwesomeIcon icon={faFileUpload} className="text-green-500 mb-2" />
-                  
                   <p className="text-gray-700 text-lg font-bold">{file.name}</p>
                   <i className="fas fa-file-upload text-green-500"></i>  
                 </>
               ) : (
-                <p className="text-gray-500">Drag and drop or click to select a file.</p>
+                <p className="text-gray-500">Select a File</p>
               )}
             </div>
             <button
