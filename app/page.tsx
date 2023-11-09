@@ -13,16 +13,19 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Textarea from "react-textarea-autosize";
 import { toast } from "sonner";
-import { useDropzone } from 'react-dropzone';
 
 
 
+
+// Chat component that manages the chat interface and interactions
 export default function Chat() {
+  // Refs for form and input elements
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
+  // Custom hook to manage chat state and interactions
   const { messages, input, setInput, handleSubmit, isLoading} = useChat({
-  
+    // Error handling callback
     onError: (error) => {
       va.track("Chat errored", {
         input,
@@ -31,11 +34,14 @@ export default function Chat() {
     },
   });
 
+  // Determine if the chat interface should be disabled
   const disabled = isLoading || input.length === 0;
+
+  // State variables for managing various aspects of the chat assistant
   const [assistantName, setAssistantName] = useState('');
   const [assistantModel, setAssistantModel] = useState('gpt-4-1106-preview');
   const [assistantDescription, setAssistantDescription] = useState('');
-  const [inputmessage, setInputmessage] = useState('Introduce youself');
+  const [inputmessage, setInputmessage] = useState('Introduce yourself');
   const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
   const [chatStarted, setChatStarted] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -43,57 +49,39 @@ export default function Chat() {
   const [assistantId, setAssistantId] = useState<string | null>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
   
+  // Handler for file input changes
   const handleFileChange = (selectedFile: File) => {
     setFile(selectedFile);
   };
-  
 
-
-
+  // Handler for form submissions
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Function called -- handleFormSubmit');
-  
-    // Add the user's message to the chat
-    setChatMessages(prevMessages => [
-      ...prevMessages,
-      { role: 'user', content: input }
-    ]);
+    console.log('Handling form submission.');
+
+    // Update chat messages with user input
+    setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: input }]);
     setInput('');
-    console.log('Message field cleared -- handleFormSubmit');
-  
-    
-  
-    const chatData = new FormData();
-    if (assistantId) {
-      chatData.set('assistantId', assistantId);
-    }
-    if (threadId) {
-      chatData.set('threadId', threadId);
-    }
-    chatData.set('input', input);
+    console.log('User message added to chat.');
 
-    // Call the addMessage API route
-    console.log('Call the addMessage API route -- handleFormSubmit');
-    console.log('with thread_ID:',threadId);
-    console.log('with input:',input);
-
+    // Preparing data for API calls
     let formData = new FormData();
     if (threadId) {
       formData.append('threadId', threadId);
     }
     formData.append('input', input);
+
     // Call the addMessage API route
+    console.log('Sending message to addMessage API endpoint.');
     const addMessageResponse = await fetch('/api/addMessage', {
       method: 'POST',
       body: formData
     });
     const addMessageData = await addMessageResponse.json();
-    console.log('addMessage (DONE) -- handleFormSubmit');
-  
+    console.log('Message sent to addMessage API endpoint.');
 
     // Call the runAssistant API route
-    console.log('Call the --runAssistantResponse-- API route -- handleFormSubmit');
+    console.log('Invoking runAssistant API endpoint.');
     let formData_run = new FormData();
     if (assistantId) {
       formData_run.append('assistantId', assistantId);
@@ -106,16 +94,10 @@ export default function Chat() {
       body: formData_run
     });
     const runAssistantData = await runAssistantResponse.json();
-    console.log('runAssistantResponse (DONE) -- handleFormSubmit');
+    console.log('Received response from runAssistant API endpoint.');
 
-    const runId = runAssistantData;
-    console.log('----> runAssistant_ID :', runId);
-
-
-    // Check the status every second until completed
-    console.log('Check the status every second until completed');
+    // Checking the status of the assistant's response
     let status = runAssistantData.status;
-
     let formData_checkStatus = new FormData();
     if (threadId) {
       formData_checkStatus.append('threadId', threadId);
@@ -132,93 +114,70 @@ export default function Chat() {
       const statusData = await statusResponse.json();
       status = statusData.status;
 
-      console.log('Current status:', status);
-
+      console.log('Checking assistant response status:', status);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    console.log('------(DONE)------');
+    console.log('Assistant response processing completed.');
 
-
-
-    // Call the listMessages API route
-    console.log('----> Call the listMessages API route');
-
+    // Retrieve messages from the assistant
+    console.log('Fetching messages from listMessages API endpoint.');
     let formData_listMessage = new FormData();
     if (threadId) {
       formData_listMessage.append('threadId', threadId);
     }
-    
 
     const listMessagesResponse = await fetch('/api/listMessages', {
       method: 'POST',
       body: formData_listMessage
     });
     const listMessagesData = await listMessagesResponse.json();
-    console.log('#####DONE######');
+    console.log('Messages retrieved from listMessages API endpoint.');
 
-  
-      // Add the assistant's response to the chat
+    // Update chat with the assistant's response
     if (listMessagesResponse.ok) {
       const lastMessage = listMessagesData.messages[0];
-      console.log('Last assistant message:', lastMessage);
+      console.log('Adding assistant\'s message to the chat.');
 
       setChatMessages(prevMessages => [
         ...prevMessages,
         { role: 'assistant', content: lastMessage.content[0].text.value }
       ]);
     } else {
-      // Handle error
-      console.error('Error:', listMessagesData.error);
+      console.error('Error retrieving messages:', listMessagesData.error);
     }
   };
 
-
-
+  // Function to initialize the chat assistant
   async function startAssistant() {
-    console.log('Start-Assistant - Name :', assistantName);
-    console.log('Start-Assistant - Model:', assistantModel);
-    console.log('Start-Assistant - Description:', assistantDescription);
-    console.log('Start-Assistant - Initial-Message:', inputmessage);
-    
+    console.log('Initializing chat assistant.');
     setIsButtonDisabled(true);
-    console.log('Button Disabled (true)  -- startAssistant');
 
-    console.log('Send a POST request to the backend -- startAssistant ');
-
+    // Preparing file data for upload
     const fileInput = document.getElementById('file-input') as HTMLInputElement;
     const file = fileInput && fileInput.files ? fileInput.files[0] : null;
 
-    console.log('prep fileData');
     const fileData = new FormData();
     if (file) {
       fileData.set('file', file);
     }
 
-    console.log('calling the UPLOAD API-ROUTE');
+    // Uploading file data
+    console.log('Uploading file data.');
     const uploadResponse = await fetch('/api/upload', {
       method: 'POST',
       body: fileData,
     });
-    console.log('calling the UPLOAD API-ROUTE DONEEEE');
 
     const uploadData = await uploadResponse.json();
-    
-    // Check if the upload was successful
     if (!uploadResponse.ok) {
-      console.error('Upload failed');
+      console.error('File upload failed.');
       return;
     }
 
-    console.log('Upload successful');
-
-    // Get the file ID from the response
+    console.log('File uploaded successfully.');
     const fileId = uploadData.fileId;
-    console.log('File ID (page):', fileId);
-     
 
-    
-
-
+    // Preparing data to start chat
     const chatData = new FormData();
     chatData.set('assistantName', assistantName);
     chatData.set('assistantModel', assistantModel);
@@ -228,50 +187,25 @@ export default function Chat() {
       chatData.set('file', file);
     }
     chatData.set('fileId', fileId);
-    console.log('calling the startChat - API - ROUTE');
+
+    // Starting the chat
+    console.log('Starting chat with the assistant.');
     const startChatResponse = await fetch('/api/startChat', {
       method: 'POST',
       body: chatData,
     });
-    console.log('CALLED/DONE the startChat - API - ROUTE');
-    
-    // Log the raw response
-    console.log('Raw startChatResponse:', startChatResponse);
-    
-
-    if (!startChatResponse.ok) {
-      console.error('Error starting chat');
-      return;
-    }
-
-    console.log('Send a POST request to the backend DONE -- startAssistant ');
-  
     const startChatData = await startChatResponse.json();
-    console.log('startChatData:', startChatData);
-    
 
     if (startChatResponse.ok) {
       setAssistantId(startChatData.assistantId);
       setThreadId(startChatData.threadId);
-      console.log(assistantId);
-      console.log(threadId);
 
       setIsButtonDisabled(false);
-      console.log('Button disabled (false) -- startAssistant');
-
-      // Add the first message to the chat
-      //setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: inputmessage }]);
-      //console.log('Added the first user message to the chat -- startAssistant ');
-      
-      // Add the assistant's response to your chat messages
       setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: startChatData.response }]);
-      console.log('Added the assistant response to your chat messages -- startAssistant ');
-      
-      
       setChatStarted(true);
-      console.log('setChatStarted (true) -- startAssistant ');
+      console.log('Chat with assistant started successfully.');
     } else {
-      console.error('Error:', startChatData.error);
+      console.error('Error starting chat:', startChatData.error);
       setIsButtonDisabled(false);
     }
   }
