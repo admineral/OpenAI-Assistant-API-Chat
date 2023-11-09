@@ -32,13 +32,14 @@ export default function Chat() {
   const [assistantName, setAssistantName] = useState('');
   const [assistantModel, setAssistantModel] = useState('gpt-4-1106-preview');
   const [assistantDescription, setAssistantDescription] = useState('');
-  const [inputmessage, setInputmessage] = useState('');
+  const [inputmessage, setInputmessage] = useState('Introduce youself');
   const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
   const [chatStarted, setChatStarted] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [file, setFile] = useState<File>();
   const [assistantId, setAssistantId] = useState<string | null>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
+ 
   
 
 
@@ -181,8 +182,8 @@ export default function Chat() {
       console.log('Button disabled (false) -- startAssistant');
 
       // Add the first message to the chat
-      setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: inputmessage }]);
-      console.log('Added the first user message to the chat -- startAssistant ');
+      //setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: inputmessage }]);
+      //console.log('Added the first user message to the chat -- startAssistant ');
       
       // Add the assistant's response to your chat messages
       setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: startChatData.response }]);
@@ -272,6 +273,15 @@ export default function Chat() {
                 required
                 className="p-2 border border-gray-200 rounded-md"
               />
+
+              <input
+                type="text"
+                placeholder="Assistant Description"
+                value={assistantDescription}
+                onChange={(e) => setAssistantDescription(e.target.value)}
+                required
+                className="p-2 border border-gray-200 rounded-md"
+              />
               <select
                 value={assistantModel}
                 onChange={(e) => setAssistantModel(e.target.value)}
@@ -281,22 +291,6 @@ export default function Chat() {
                 <option value="gpt-4-1106-preview">GPT-4</option>
                 <option value="gpt-3.5-turbo-1106">GPT-3.5</option>
               </select>
-              <input
-                type="text"
-                placeholder="Assistant Description"
-                value={assistantDescription}
-                onChange={(e) => setAssistantDescription(e.target.value)}
-                required
-                className="p-2 border border-gray-200 rounded-md"
-              />
-              <input
-                type="text"
-                placeholder="Message"
-                value={inputmessage}
-                onChange={(e) => setInputmessage(e.target.value)}
-                required
-                className="p-2 border border-gray-200 rounded-md"
-              />
             <input
                 type="file"
                 id="file-input"
