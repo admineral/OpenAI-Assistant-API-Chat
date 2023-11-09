@@ -1,6 +1,7 @@
-// pages/api/chat.ts
+// app/api/chat.ts
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from "openai";
+
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -14,18 +15,33 @@ export async function POST(req: NextRequest) {
   if (req.method === 'POST') {
     try {
       
-      const body = await req.json();
-      const { assistantName, assistantModel, assistantDescription, inputmessage } = body;
-      const { input } = body;
+      const formData = await req.formData();
+      const assistantName = formData.get('assistantName') as string;
+      const assistantModel = formData.get('assistantModel');
+      const assistantDescription = formData.get('assistantDescription') as string;
+      const inputmessage = formData.get('inputmessage');
+      const input = formData.get('input') as string;
+      const fileId = formData.get('fileId') as string;
 
+      if (inputmessage === null || typeof inputmessage !== 'string') {
+        throw new Error('inputmessage is missing or not a string');
+      }
+      if (typeof input !== 'string') {
+        throw new Error('Input is not a string');
+      }
       
+      console.log('THE FINAL FILE - ID ', fileId);
       if (!assistant) {
-        assistant = await openai.beta.assistants.create({
+        const assistantOptions: any = {
           name: assistantName,
           instructions: assistantDescription,
           model: "gpt-4-1106-preview",
           tools: [{ "type": "retrieval" }],
-        });
+        };
+        if (fileId) {
+          assistantOptions.file_ids = [fileId];
+        }
+        assistant = await openai.beta.assistants.create(assistantOptions);
       }
 
       console.log('Created assistant with Id:', assistant.id);
@@ -118,7 +134,7 @@ export async function POST(req: NextRequest) {
             if (assistantMessageContent.type !== "text") {
               return NextResponse.json({ error: "Assistant message is not text, only text supported in this demo" });
             }
-      
+            console.log(Response)
             // Return the assistant's response
             return NextResponse.json({ response: assistantMessageContent.text.value });
           } catch (error) {

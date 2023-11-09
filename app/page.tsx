@@ -35,52 +35,57 @@ export default function Chat() {
   const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
   const [chatStarted, setChatStarted] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [file, setFile] = useState<File>();
+
+
+
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log('Function called -- handleFormSubmit');
-
+  
     // Add the user's message to the chat
     setChatMessages(prevMessages => [
       ...prevMessages,
       { role: 'user', content: input }
-
     ]);
     setInput('');
     console.log('Message field cleared -- handleFormSubmit');
   
-  
     // Send a POST request to the backend
     console.log('Send a POST request to the backend -- handleFormSubmit');
-
+  
+    // Create a FormData object
+    const data = new FormData();
+    // Append the input message to it
+    data.set('input', input);
+    // Append the inputmessage to it
+    data.set('inputmessage', inputmessage);
+  
+    // Call the chat API instead of the upload API
     const response = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ input }),
+      body: data,
     });
   
-    const data = await response.json();
-
+    const responseData = await response.json();
+  
     console.log('Send a POST request to the backend DONE -- handleFormSubmit ');
-
+  
     if (response.ok) {
       // Handle successful response
       console.log('Successful response -- handleFormSubmit ');
-    
+  
       setChatMessages(prevMessages => [
           ...prevMessages,
-          { role: 'assistant', content: data.response }
+          { role: 'assistant', content: responseData.response }
         ]);
-    
+  
       console.log('Added "user" and "Assistant" message to the chat -- handleFormSubmit ');
     } else {
       // Handle error
-      console.error('Error:', data.error);
+      console.error('Error:', responseData.error);
     }
-  
-    
   };
 
 
@@ -95,24 +100,66 @@ export default function Chat() {
     console.log('Button Disabled (true)  -- startAssistant');
 
     console.log('Send a POST request to the backend -- startAssistant ');
-    const response = await fetch('/api/chat', {
+
+    const fileInput = document.getElementById('file-input') as HTMLInputElement;
+    const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+
+    console.log('prep fileData');
+    const fileData = new FormData();
+    if (file) {
+      fileData.set('file', file);
+    }
+
+    console.log('calling the UPLOAD API-ROUTE');
+    const uploadResponse = await fetch('/api/upload', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        assistantName,
-        assistantModel,
-        assistantDescription,
-        inputmessage,
-      }),
+      body: fileData,
     });
+    console.log('calling the UPLOAD API-ROUTE DONEEEE');
+
+    const uploadData = await uploadResponse.json();
+    
+    // Check if the upload was successful
+    if (!uploadResponse.ok) {
+      console.error('Upload failed');
+      return;
+    }
+
+    console.log('Upload successful');
+
+    // Get the file ID from the response
+    const fileId = uploadData.fileId;
+
+    console.log('File-ID: ', fileId);
+
+
+    const chatData = new FormData();
+    chatData.set('assistantName', assistantName);
+    chatData.set('assistantModel', assistantModel);
+    chatData.set('assistantDescription', assistantDescription);
+    chatData.set('inputmessage', inputmessage);
+    chatData.set('input', input);
+    if (fileId) {
+      chatData.set('fileId', fileId);
+    }
+
+    const chatResponse = await fetch('/api/chat', {
+      method: 'POST',
+      body: chatData,
+    }).catch(error => {
+      console.error('Fetch error:', error);
+      return null; // return null instead of undefined
+    });
+    if (!chatResponse) {
+      console.error('No response received');
+      return;
+    }
 
     console.log('Send a POST request to the backend DONE -- startAssistant ');
   
-    const data = await response.json();
+    const data = await chatResponse.json();
   
-    if (response.ok) {
+    if (chatResponse.ok) {
       setIsButtonDisabled(false);
       console.log('Button disabled (false) -- startAssistant');
 
@@ -214,7 +261,6 @@ export default function Chat() {
                 required
                 className="p-2 border border-gray-200 rounded-md"
               >
-                <option value="">Select Assistant Model</option>
                 <option value="gpt-4-1106-preview">GPT-4</option>
                 <option value="gpt-3.5-turbo-1106">GPT-3.5</option>
               </select>
@@ -232,6 +278,12 @@ export default function Chat() {
                 value={inputmessage}
                 onChange={(e) => setInputmessage(e.target.value)}
                 required
+                className="p-2 border border-gray-200 rounded-md"
+              />
+            <input
+                type="file"
+                id="file-input"
+                onChange={(e) => setFile(e.target.files?.[0])}
                 className="p-2 border border-gray-200 rounded-md"
               />
             <button

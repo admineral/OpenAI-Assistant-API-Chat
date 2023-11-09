@@ -10,6 +10,7 @@ export const metadata = {
   title: "Agentus Smith",
   description:
     "Built with OpenAI Assistant API",
+    metadataBase: 'https://mydomain.com'
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
