@@ -1,6 +1,11 @@
 //app/page.tsx
 "use client";
 
+import LinkBar from './components/LinkBar';
+import MessageList from './components/MessageList';
+import WelcomeForm from './components/WelcomeForm';
+import InputForm from './components/InputForm';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFileUpload } from '@fortawesome/free-solid-svg-icons'
 import { useRef, useState } from "react";
@@ -316,189 +321,34 @@ export default function Chat() {
 
   return (
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
-      <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
-        <a
-          href="/deploy"
-          target="_blank"
-          className="rounded-lg p-2 transition-colors duration-200 hover:bg-stone-100 sm:bottom-auto"
-        >
-          <VercelIcon />
-        </a>
-        <a
-          href="/github"
-          target="_blank"
-          className="rounded-lg p-2 transition-colors duration-200 hover:bg-stone-100 sm:bottom-auto"
-        >
-          <GithubIcon />
-        </a>
-      </div>
+      <LinkBar />
       {chatMessages.length > 0 ? (
-        chatMessages.map((message, i) => (
-          <div
-            key={i}
-            className={clsx(
-              "flex w-full items-center justify-center border-b border-gray-200 py-8",
-              message.role === "user" ? "bg-white" : "bg-gray-100",
-            )}
-          >
-            <div className="flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0">
-              <div
-                className={clsx(
-                  "p-1.5 text-white",
-                  message.role === "assistant" ? "bg-green-500" : "bg-black",
-                )}
-              >
-                {message.role === "user" ? (
-                  <User width={20} />
-                ) : (
-                  <Bot width={20} />
-                )}
-              </div>
-              <ReactMarkdown
-                className="prose mt-1 w-full break-words prose-p:leading-relaxed"
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  // open links in new tab
-                  a: (props) => (
-                    <a {...props} target="_blank" rel="noopener noreferrer" />
-                  ),
-                }}
-              >
-                {message.content}
-              </ReactMarkdown>
-            </div>
-          </div>
-        ))
+        <MessageList chatMessages={chatMessages} />
       ) : (
-          <div className="border-gray-500 bg-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border-2 sm:w-full">
-          <div className="flex flex-col space-y-4 p-7 sm:p-10">
-            <h1 className="text-lg font-semibold text-black">
-              Welcome to Agent42!
-            </h1>
-            <form
-              className="flex flex-col space-y-3"
-            >
-              <input
-                type="text"
-                placeholder="Assistant Name"
-                value={assistantName}
-                onChange={(e) => setAssistantName(e.target.value)}
-                required
-                className="p-2 border border-gray-200 rounded-md"
-              />
-        
-              <input
-                type="text"
-                placeholder="Assistant Description"
-                value={assistantDescription}
-                onChange={(e) => setAssistantDescription(e.target.value)}
-                required
-                className="p-2 border border-gray-200 rounded-md"
-              />
-              <div>
-                <button
-                  onClick={() => setAssistantModel('gpt-4-1106-preview')}
-                  className={`p-1 border border-gray-400 rounded-md ${assistantModel === 'gpt-4-1106-preview' ? 'bg-blue-500 text-white' : ''}`}
-                >
-                  GPT-4
-                </button>
-                <button
-                  onClick={() => setAssistantModel('gpt-3.5-turbo-1106')}
-                  className={`p-1 border border-gray-400 rounded-md ${assistantModel === 'gpt-3.5-turbo-1106' ? 'bg-blue-500 text-white' : ''}`}
-                >
-                  GPT-3.5
-                </button>
-              </div>
-              <div 
-              className="drop-area border-2 border-dashed border-gray-400 rounded-md p-4 text-center"
-              onClick={() => {
-                const fileInput = document.getElementById('file-input');
-                if (fileInput) {
-                  fileInput.click();
-                }
-              }}
-            >
-              <input 
-                id="file-input"
-                type="file" 
-                accept=".c,.cpp,.csv,.docx,.html,.java,.json,.md,.pdf,.pptx,.txt,.tex"
-                onChange={(e) => {
-                  if (e.target.files) {
-                    handleFileChange(e.target.files[0]);
-                  }
-                }} 
-                required
-                style={{ display: 'none' }} 
-              />
-              {file ? (
-                <>
-                  <FontAwesomeIcon icon={faFileUpload} className="text-green-500 mb-2" />
-                  <p className="text-gray-700 text-lg font-bold">{file.name}</p>
-                  <i className="fas fa-file-upload text-green-500"></i>  
-                </>
-              ) : (
-                <p className="text-gray-500">Select a File</p>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={startAssistant}
-              disabled={isButtonDisabled || !assistantName || !assistantDescription || !file}
-              className={`p-2 rounded-md flex justify-center items-center ${isButtonDisabled ? 'bg-gray-500 text-gray-300' : 'bg-green-500 text-white'}`}
-            >
-              {isStartLoading ? <LoadingCircle /> : "Start"}
-            </button>
-            </form>
-          </div>
-        </div>
+        <WelcomeForm
+          assistantName={assistantName}
+          setAssistantName={setAssistantName}
+          assistantDescription={assistantDescription}
+          setAssistantDescription={setAssistantDescription}
+          assistantModel={assistantModel}
+          setAssistantModel={setAssistantModel}
+          file={file}
+          handleFileChange={handleFileChange}
+          startAssistant={startAssistant}
+          isButtonDisabled={isButtonDisabled}
+          isStartLoading={isStartLoading}
+        />
       )}
-      <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
-        <form
-          ref={formRef}
-          onSubmit={handleFormSubmit}
-          
-          className="relative w-full max-w-screen-md rounded-xl border border-gray-200 bg-white px-4 pb-2 pt-3 shadow-lg sm:pb-3 sm:pt-4"
-        >
-          <Textarea
-            ref={inputRef}
-            tabIndex={0}
-            required
-            rows={1}
-            autoFocus
-            placeholder="Send a message"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && chatStarted) {
-                formRef.current?.requestSubmit();
-                e.preventDefault();
-              }
-            }}
-            spellCheck={false}
-            className="w-full pr-10 focus:outline-none"
-          />
-          <button
-            className={clsx(
-              "absolute inset-y-0 right-3 my-auto flex h-8 w-8 items-center justify-center rounded-md transition-all",
-              disabled || !chatStarted
-                ? "cursor-not-allowed bg-white"
-                : "bg-green-500 hover:bg-green-600",
-            )}
-            disabled={disabled || !chatStarted}
-          >
-            {isSending ? (
-              <LoadingCircle />
-            ) : (
-              <SendIcon
-                className={clsx(
-                  "h-4 w-4",
-                  input.length === 0 ? "text-gray-300" : "text-white",
-                )}
-              />
-            )}
-          </button>
-        </form>
-      </div>
+      <InputForm
+        input={input}
+        setInput={setInput}
+        handleFormSubmit={handleFormSubmit}
+        inputRef={inputRef}
+        formRef={formRef}
+        disabled={disabled}
+        chatStarted={chatStarted}
+        isSending={isSending}
+      />
     </main>
   );
-}
+};
