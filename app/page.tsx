@@ -37,7 +37,7 @@ export default function Chat() {
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [file, setFile] = useState<File>();
 
-  const handleFileDrop = (e) => {
+  const handleFileDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const files = e.dataTransfer.files;
     if (files.length) {
@@ -46,7 +46,7 @@ export default function Chat() {
   };
 
   // Function to handle file drag over
-  const handleFileDragOver = (e) => {
+  const handleFileDragOver = (e: React.DragEvent) => {
     e.preventDefault();
   };
 
