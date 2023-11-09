@@ -1,3 +1,4 @@
+//app/page.tsx
 "use client";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -61,8 +62,7 @@ export default function Chat() {
     setInput('');
     console.log('Message field cleared -- handleFormSubmit');
   
-    // Send a POST request to the backend
-    console.log('Send a POST request to the backend -- handleFormSubmit');
+    
   
     const chatData = new FormData();
     if (assistantId) {
@@ -73,28 +73,102 @@ export default function Chat() {
     }
     chatData.set('input', input);
 
-    const chatResponse = await fetch('/api/chat', {
+    // Call the addMessage API route
+    console.log('Call the addMessage API route -- handleFormSubmit');
+    console.log('with thread_ID:',threadId);
+    console.log('with input:',input);
+
+    let formData = new FormData();
+    if (threadId) {
+      formData.append('threadId', threadId);
+    }
+    formData.append('input', input);
+    // Call the addMessage API route
+    const addMessageResponse = await fetch('/api/addMessage', {
       method: 'POST',
-      body: chatData,
+      body: formData
     });
+    const addMessageData = await addMessageResponse.json();
+    console.log('addMessage (DONE) -- handleFormSubmit');
   
-    const responseData = await chatResponse.json();
+
+    // Call the runAssistant API route
+    console.log('Call the --runAssistantResponse-- API route -- handleFormSubmit');
+    let formData_run = new FormData();
+    if (assistantId) {
+      formData_run.append('assistantId', assistantId);
+    }
+    if (threadId) {
+      formData_run.append('threadId', threadId);
+    }
+    const runAssistantResponse = await fetch('/api/runAssistant', {
+      method: 'POST',
+      body: formData_run
+    });
+    const runAssistantData = await runAssistantResponse.json();
+    console.log('runAssistantResponse (DONE) -- handleFormSubmit');
+
+    const runId = runAssistantData;
+    console.log('----> runAssistant_ID :', runId);
+
+
+    // Check the status every second until completed
+    console.log('Check the status every second until completed');
+    let status = runAssistantData.status;
+
+    let formData_checkStatus = new FormData();
+    if (threadId) {
+      formData_checkStatus.append('threadId', threadId);
+    }
+    if (runAssistantData.runId) {
+      formData_checkStatus.append('runId', runAssistantData.runId);
+    }
+
+    while (status !== 'completed') {
+      const statusResponse = await fetch('/api/checkRunStatus', {
+        method: 'POST',
+        body: formData_checkStatus
+      });
+      const statusData = await statusResponse.json();
+      status = statusData.status;
+
+      console.log('Current status:', status);
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    console.log('------(DONE)------');
+
+
+
+    // Call the listMessages API route
+    console.log('----> Call the listMessages API route');
+
+    let formData_listMessage = new FormData();
+    if (threadId) {
+      formData_listMessage.append('threadId', threadId);
+    }
+    
+
+    const listMessagesResponse = await fetch('/api/listMessages', {
+      method: 'POST',
+      body: formData_listMessage
+    });
+    const listMessagesData = await listMessagesResponse.json();
+    console.log('#####DONE######');
+
   
-    console.log('Send a POST request to the backend DONE -- handleFormSubmit ');
-  
-    if (chatResponse.ok) {
-      // Handle successful response
-      console.log('Successful response -- handleFormSubmit ');
-  
+      // Add the assistant's response to the chat
+    if (listMessagesResponse.ok) {
+      const lastMessage = listMessagesData.messages[0];
+      console.log('Last assistant message:', lastMessage);
+
       setChatMessages(prevMessages => [
-          ...prevMessages,
-          { role: 'assistant', content: responseData.response }
-        ]);
-  
-      console.log('Added "user" and "Assistant" message to the chat -- handleFormSubmit ');
+        ...prevMessages,
+        { role: 'assistant', content: lastMessage.content[0].text.value }
+      ]);
     } else {
       // Handle error
-      console.error('Error:', responseData.error);
+      console.error('Error:', listMessagesData.error);
     }
   };
 

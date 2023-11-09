@@ -1,10 +1,11 @@
-// app/api/startChat.ts/route.ts
+// app/api/startChat/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
 
 export async function POST(req: NextRequest) {
     console.log('STARTET STARTCHAT API ROUTE INSIDE!!!!');

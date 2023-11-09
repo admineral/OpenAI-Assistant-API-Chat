@@ -1,3 +1,4 @@
+// app/api/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile } from 'fs/promises'
 import { createReadStream } from 'fs'
@@ -6,6 +7,8 @@ import OpenAI from "openai";
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+
 
 export async function POST(request: NextRequest) {
   console.log(`Upload API call started`)
