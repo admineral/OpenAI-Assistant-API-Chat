@@ -11,6 +11,9 @@
     "format": "prettier \"**/*.{css,js,json,jsx,ts,tsx}\""
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@types/node": "20.3.1",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
