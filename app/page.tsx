@@ -5,25 +5,9 @@ import LinkBar from './components/LinkBar';
 import MessageList from './components/MessageList';
 import WelcomeForm from './components/WelcomeForm';
 import InputForm from './components/InputForm';
-
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFileUpload } from '@fortawesome/free-solid-svg-icons'
 import { useRef, useState } from "react";
 import { useChat } from "ai/react";
 import va from "@vercel/analytics";
-import clsx from "clsx";
-import { VercelIcon, GithubIcon, LoadingCircle, SendIcon } from "./icons";
-import { Bot, User } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import Textarea from "react-textarea-autosize";
-import { toast } from "sonner";
-
-interface Message {
-  content: string;
-  // other properties...
-}
-
 
 // Chat component that manages the chat interface and interactions
 export default function Chat() {
@@ -32,7 +16,7 @@ export default function Chat() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Custom hook to manage chat state and interactions
-  const { messages, input, setInput, handleSubmit, isLoading} = useChat({
+  const { input, setInput, isLoading} = useChat({
     // Error handling callback
     onError: (error) => {
       va.track("Chat errored", {
@@ -64,6 +48,17 @@ export default function Chat() {
   const handleFileChange = (selectedFile: File) => {
     setFile(selectedFile);
   };
+
+
+  const convertFileToBase64 = (file : any) => new Promise((resolve, reject) => {
+    console.log('converting image to Base64');
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+    console.log('image CONVERTED');
+  });
+
 
   // Handler for form submissions
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -179,11 +174,45 @@ export default function Chat() {
   
     let fileId = null;
     if (file) {
-      // Uploading file data
+      let fileToUpload = file;
+  
+      // Check if the file is an image
+      if (file.type.startsWith('image/')) {
+        console.log('Habe ein Bild empfangen!!!');
+        // Convert the image to base64
+        const base64Image = await convertFileToBase64(file);
+        console.log('und in Base64 verwandelt lol');
+        //console.log(base64Image);
+        
+        // Process the image to get a text description
+        console.log('Process the image to get a text description');
+        const descriptionResponse = await fetch('/api/upload_gpt4v', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file: base64Image }),
+        });
+        console.log('Process the image to get a text description---ERROR');
+        
+  
+        const descriptionData = await descriptionResponse.json();
+        console.log(descriptionData);
+
+  
+        if (descriptionResponse.ok) {
+          // Use the description as the file content
+          const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
+          fileToUpload = new File([descriptionBlob], "description.txt");
+        } else {
+          console.error('Error processing image:', descriptionData.message);
+          return;
+        }
+      }
+  
+      // Upload the file (either the original file or the generated description file)
       console.log('Uploading file data.');
       const fileData = new FormData();
-      fileData.set('file', file);
-  
+      fileData.set('file', fileToUpload);
+      
       const uploadResponse = await fetch('/api/upload', {
         method: 'POST',
         body: fileData,
@@ -197,7 +226,7 @@ export default function Chat() {
       fileId = uploadData.fileId;
       console.log('File uploaded successfully, ID:', fileId);
     }
-  
+    
     // Create assistant
     console.log('Creating assistant.');
     const assistantData = new FormData();
