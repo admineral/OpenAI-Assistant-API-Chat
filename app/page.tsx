@@ -47,7 +47,7 @@ export default function Chat() {
 
   // State variables for managing various aspects of the chat assistant
   const [assistantName, setAssistantName] = useState('');
-  const [assistantModel, setAssistantModel] = useState('gpt-4-1106-preview');
+  const [assistantModel, setAssistantModel] = useState('gpt-3.5-turbo-1106');
   const [assistantDescription, setAssistantDescription] = useState('');
   const [inputmessage, setInputmessage] = useState('Introduce yourself');
   const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
