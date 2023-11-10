@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   console.log('Received image in base64 format');
 
   // Use the provided custom prompt or a default prompt if not provided
-  const promptText = customPrompt || "Whats in this image?";
+  const promptText = customPrompt || "Examine and articulate a detailed description of the presented image, focusing on clarity and context. Pay close attention to visual elements such as color schemes, object details, the positioning and expressions of people, and the overall environment. For textual content within the image, provide a verbatim transcription, framed as ‘Content: “[Exact Text]”’, and note textual attributes like font size, style, and color. The objective is to deliver a comprehensive, nuanced depiction of the scene, ensuring all visual and textual components are accurately and thoroughly represented.?";
   console.log(`Using prompt: ${promptText}`);
 
   // Send the image and prompt to OpenAI for processing
