@@ -20,11 +20,11 @@ const openai = new OpenAI({
 // Define an asynchronous POST function to handle incoming requests
 export async function POST(req: NextRequest) {
   try {
-    // Extract form data from the request
-    const formData = await req.formData();
+    // Extract JSON data from the request
+    const data = await req.json();
 
-    // Retrieve 'threadId' from form data and cast it to string
-    const threadId = formData.get('threadId') as string;
+    // Retrieve 'threadId' from JSON data
+    const threadId = data.threadId;
 
     // Log the received thread ID for debugging
     console.log(`Received request with threadId: ${threadId}`);
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Assistant message is not text, only text supported in this demo" });
     }
     // Return the retrieved messages as a JSON response
-    return NextResponse.json({ messages: assistantMessageContent.text.value });
+    return NextResponse.json({ ok: true, messages: assistantMessageContent.text.value });
   } catch (error) {
     // Log any errors that occur during the process
     console.error(`Error occurred: ${error}`);

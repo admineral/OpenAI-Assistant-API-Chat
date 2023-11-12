@@ -23,10 +23,10 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    // Extract form data from the request
-    const formData = await req.formData();
-    const threadId = formData.get('threadId') as string;
-    const runId = formData.get('runId') as string;
+    // Extract JSON data from the request
+    const data = await req.json();
+    const threadId = data.threadId;
+    const runId = data.runId;
 
     // Log the received thread ID and run ID for debugging
     console.log(`Received request with threadId: ${threadId} and runId: ${runId}`);

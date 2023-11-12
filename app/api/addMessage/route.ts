@@ -21,10 +21,10 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    // Extract thread ID and input content from form data
-    const formData = await req.formData();
-    const threadId = formData.get('threadId') as string;
-    const input = formData.get('input') as string;
+    // Extract thread ID and input content from JSON data
+    const data = await req.json();
+    const threadId = data.threadId;
+    const input = data.input;
 
     // Log the received thread ID and input for debugging purposes
     console.log(`inside add_Message -Thread ID: ${threadId}`);

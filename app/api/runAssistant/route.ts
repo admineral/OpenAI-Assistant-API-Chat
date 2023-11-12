@@ -1,14 +1,3 @@
-/**
- * API Route - Run Assistant
- * 
- * This API route is responsible for running a specific assistant within a thread.
- * It handles POST requests containing 'assistantId' and 'threadId', initiating a run
- * of the assistant in the specified thread. The OpenAI API is used to create the run,
- * and the route returns the unique 'runId' for further interactions.
- * 
- * Path: /api/runAssistant
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from "openai";
 
@@ -19,10 +8,10 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    // Extract assistant ID and thread ID from form data
-    const formData = await req.formData();
-    const assistantId = formData.get('assistantId') as string;
-    const threadId = formData.get('threadId') as string;
+    // Extract assistant ID and thread ID from JSON data
+    const data = await req.json();
+    const assistantId = data.assistantId;
+    const threadId = data.threadId;
     
     // Log the received IDs for debugging
     console.log(`Inside -runAssistant --> assistantId: ${assistantId}`);

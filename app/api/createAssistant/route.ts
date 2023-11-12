@@ -11,21 +11,18 @@
  * Path: /api/createAssistant
  */
 import { NextRequest, NextResponse } from 'next/server'
-import OpenAI from "openai";
+import { OpenAI } from 'openai';
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+    apiKey: process.env.OPENAI_API_KEY,
+  });
 
-export async function POST(req: NextRequest) {
+
+
+  export async function POST(req: NextRequest) {
     if (req.method === 'POST') {
         try {
-            const formData = await req.formData();
-
-            const assistantName = formData.get('assistantName') as string;
-            const assistantModel = formData.get('assistantModel') as string;
-            const assistantDescription = formData.get('assistantDescription') as string;
-            const fileId = formData.get('fileId') as string;
+            const { assistantName, assistantModel, assistantDescription, fileId } = await req.json();
 
             if (!assistantName || !assistantModel || !assistantDescription) {
                 throw new Error('Missing required assistant parameters');

@@ -8,6 +8,16 @@ import InputForm from './components/InputForm';
 import { useRef, useState } from "react";
 import { useChat } from "ai/react";
 import va from "@vercel/analytics";
+import {
+  uploadImageAndGetDescription,
+  uploadFile,
+  createAssistant,
+  createThread,
+  runAssistant,
+  checkRunStatus,
+  listMessages,
+  addMessage,
+} from './api';
 
 // Chat component that manages the chat interface and interactions
 export default function Chat() {
@@ -44,6 +54,7 @@ export default function Chat() {
   const [isSending, setIsSending] = useState(false);
   
   
+  
   // Handler for file input changes
   const handleFileChange = (selectedFile: File) => {
     setFile(selectedFile);
@@ -60,103 +71,46 @@ export default function Chat() {
   });
 
 
+
   // Handler for form submissions
-  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = async (e:any) => {
     e.preventDefault();
     console.log('Handling form submission.');
-    
+  
     setIsSending(true);
-    // Update chat messages with user input
     setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: input }]);
     setInput('');
-    console.log('User message added to chat.');
-
-    // Preparing data for API calls
-    let formData = new FormData();
-    if (threadId) {
-      formData.append('threadId', threadId);
-    }
-    formData.append('input', input);
-
-    // Call the addMessage API route
+  
+    let data = { input, threadId };
+  
     console.log('Sending message to addMessage API endpoint.');
-    const addMessageResponse = await fetch('/api/addMessage', {
-      method: 'POST',
-      body: formData
-    });
-    const addMessageData = await addMessageResponse.json();
+    const addMessageData = await addMessage(data);
     console.log('Message sent to addMessage API endpoint.');
-
-    // Call the runAssistant API route
+  
     console.log('Invoking runAssistant API endpoint.');
-    let formData_run = new FormData();
-    if (assistantId) {
-      formData_run.append('assistantId', assistantId);
-    }
-    if (threadId) {
-      formData_run.append('threadId', threadId);
-    }
-    const runAssistantResponse = await fetch('/api/runAssistant', {
-      method: 'POST',
-      body: formData_run
-    });
-    const runAssistantData = await runAssistantResponse.json();
+    const runAssistantData = await runAssistant(assistantId, threadId);
     console.log('Received response from runAssistant API endpoint.');
-
-    // Checking the status of the assistant's response
+  
     let status = runAssistantData.status;
-    let formData_checkStatus = new FormData();
-    if (threadId) {
-      formData_checkStatus.append('threadId', threadId);
-    }
-    if (runAssistantData.runId) {
-      formData_checkStatus.append('runId', runAssistantData.runId);
-    }
-
     while (status !== 'completed') {
-      const statusResponse = await fetch('/api/checkRunStatus', {
-        method: 'POST',
-        body: formData_checkStatus
-      });
-      const statusData = await statusResponse.json();
+      const statusData = await checkRunStatus(threadId, runAssistantData.runId);
       status = statusData.status;
-
       console.log('Checking assistant response status:', status);
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    console.log('Assistant response processing completed.');
-
-    // Retrieve messages from the assistant
+  
     console.log('Fetching messages from listMessages API endpoint.');
-    let formData_listMessage = new FormData();
-    if (threadId) {
-      formData_listMessage.append('threadId', threadId);
-    }
-
-    const listMessagesResponse = await fetch('/api/listMessages', {
-      method: 'POST',
-      body: formData_listMessage
-    });
-    const listMessagesData = await listMessagesResponse.json();
+    const listMessagesData = await listMessages(threadId, runAssistantData.runId);
     console.log('Messages retrieved from listMessages API endpoint.');
     setIsSending(false);
-
-    // Add the assistant's response to the chat
-    if (listMessagesResponse.ok) {
-      if (listMessagesData.messages) {
-        console.log('Adding assistant\'s message to the chat.');
-        setChatMessages(prevMessages => [
-          ...prevMessages,
-          { role: 'assistant', content: listMessagesData.messages }
-        ]);
-      } else {
-        console.error('No messages received from the assistant.');
-      }
+  
+    if (listMessagesData.ok) {
+      console.log('Adding assistant\'s message to the chat.');
+      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: listMessagesData.messages }]);
     } else {
       console.error('Error retrieving messages:', listMessagesData.error);
     }
   };
-
 
 
   async function startAssistant() {
@@ -178,160 +132,64 @@ export default function Chat() {
   
       // Check if the file is an image
       if (file.type.startsWith('image/')) {
-        console.log('Habe ein Bild empfangen!!!');
-        // Convert the image to base64
-        const base64Image = await convertFileToBase64(file);
-        console.log('und in Base64 verwandelt lol');
-        //console.log(base64Image);
-        
-        // Process the image to get a text description
-        console.log('Process the image to get a text description');
-        const descriptionResponse = await fetch('/api/upload_gpt4v', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ file: base64Image }),
-        });
-        console.log('Process the image to get a text description---ERROR');
-        
+        console.log('Received an image file');
+        const base64Image = await convertFileToBase64(file); // Ensure this function is defined elsewhere
   
-        const descriptionData = await descriptionResponse.json();
-        console.log(descriptionData);
-
-  
-        if (descriptionResponse.ok) {
-          // Use the description as the file content
-          const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
-          fileToUpload = new File([descriptionBlob], "description.txt");
-        } else {
-          console.error('Error processing image:', descriptionData.message);
-          return;
-        }
+        console.log('Processing the image to get a text description');
+        const descriptionData = await uploadImageAndGetDescription(base64Image);
+        const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
+        fileToUpload = new File([descriptionBlob], "description.txt");
       }
   
-      // Upload the file (either the original file or the generated description file)
       console.log('Uploading file data.');
-      const fileData = new FormData();
-      fileData.set('file', fileToUpload);
-      
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: fileData,
-      });
-      const uploadData = await uploadResponse.json();
-  
-      if (!uploadResponse.ok) {
-        console.error('File upload failed:', uploadData.message);
-        return;
-      }
+      const uploadData = await uploadFile(fileToUpload);
       fileId = uploadData.fileId;
       console.log('File uploaded successfully, ID:', fileId);
     }
-    
-    // Create assistant
+  
     console.log('Creating assistant.');
-    const assistantData = new FormData();
-    assistantData.set('assistantName', assistantName);
-    assistantData.set('assistantModel', assistantModel);
-    assistantData.set('assistantDescription', assistantDescription);
-    if (fileId) {
-      assistantData.set('fileId', fileId);
-    }
+    const assistantData = await createAssistant(assistantName, assistantModel, assistantDescription, fileId);
+    const assistantId = assistantData.assistantId;
   
-    const createAssistantResponse = await fetch('/api/createAssistant', {
-      method: 'POST',
-      body: assistantData,
-    });
-    const createAssistantData = await createAssistantResponse.json();
-  
-    if (!createAssistantResponse.ok) {
-      console.error('Error creating assistant:', createAssistantData.error);
-      return;
-    }
-    const assistantId = createAssistantData.assistantId;
-  
-    // Create thread
     console.log('Creating thread.');
-    const threadData = new FormData();
-    threadData.set('inputmessage', inputmessage);
+    const threadData = await createThread(inputmessage);
+    const threadId = threadData.threadId;
   
-    const createThreadResponse = await fetch('/api/createThread', {
-      method: 'POST',
-      body: threadData,
-    });
-    const createThreadData = await createThreadResponse.json();
-  
-    if (!createThreadResponse.ok) {
-      console.error('Error creating thread:', createThreadData.error);
-      return;
-    }
-    const threadId = createThreadData.threadId;
-  
-    // Run assistant
     console.log('Running assistant.');
-    const runAssistantData = new FormData();
-    runAssistantData.set('assistantId', assistantId);
-    runAssistantData.set('threadId', threadId);
+    const runAssistantData = await runAssistant(assistantId, threadId);
   
-    const runAssistantResponse = await fetch('/api/runAssistant', {
-      method: 'POST',
-      body: runAssistantData,
-    });
-    const runAssistantDataResponse = await runAssistantResponse.json();
-  
-    if (!runAssistantResponse.ok) {
-      console.error('Error running assistant:', runAssistantDataResponse.error);
-      return;
-    }
-  
-    // Check run status
-    let formData_checkRunStatus = new FormData();
-    formData_checkRunStatus.append('threadId', threadId);
-    formData_checkRunStatus.append('runId', runAssistantDataResponse.runId);
-    
     let checkRunStatusData;
     do {
-      const checkRunStatusResponse = await fetch('/api/checkRunStatus', {
-        method: 'POST',
-        body: formData_checkRunStatus,
-      });
-      checkRunStatusData = await checkRunStatusResponse.json();
-    
-      console.log('Run status:', checkRunStatusData.status); // Log the status each time
-    
-      // Return if the run appears dead
-      if (
-        checkRunStatusData.status === "cancelled" ||
-        checkRunStatusData.status === "cancelling" ||
-        checkRunStatusData.status === "failed" ||
-        checkRunStatusData.status === "expired"
-      ) {
+      checkRunStatusData = await checkRunStatus(threadId, runAssistantData.runId);
+      console.log('Run status:', checkRunStatusData.status);
+  
+      if (["cancelled", "cancelling", "failed", "expired"].includes(checkRunStatusData.status)) {
         console.error(`Run stopped due to status: ${checkRunStatusData.status}`);
         return;
       }
-    
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Delay for 1 second
+  
+      await new Promise(resolve => setTimeout(resolve, 1000));
     } while (checkRunStatusData.status !== 'completed');
-    
-    // After the run has completed
-    console.log('Get Messages from listMessages.');
-    const listMessagesResponse = await fetch('/api/listMessages', {
-      method: 'POST',
-      body: formData_checkRunStatus,
-    });
-    const listMessagesData = await listMessagesResponse.json();
-    console.log('Messages retrieved from listMessages API endpoint.');
+  
+    console.log('Getting messages from listMessages.');
 
-    if (listMessagesResponse.ok) {
-      // Log the content of the message
+    // Log the threadId and runId being used
+    console.log('Using threadId:', threadId, 'and runId:', runAssistantData.runId);
+
+    const listMessagesData = await listMessages(threadId, runAssistantData.runId);
+
+    // Log the entire response data
+    console.log('Received data from listMessages:', listMessagesData);
+
+    if (listMessagesData.ok) {
       console.log('Message content:', listMessagesData.messages);
-
-      // Add the message to the chat
-      console.log('Adding assistant\'s message to the chat.');
-      setChatMessages(prevMessages => [
-        ...prevMessages,
-        { role: 'assistant', content: listMessagesData.messages }
-      ]);
-    setIsButtonDisabled(false);
+      setChatMessages(prevMessages => {
+        console.log('Previous messages:', prevMessages);
+        console.log('Adding new messages to chat');
+        return [...prevMessages, { role: 'assistant', content: listMessagesData.messages }];
+      });
+      console.log('Setting isButtonDisabled to false');
+      setIsButtonDisabled(false);
     } else {
       console.error('Error fetching messages');
     }
@@ -339,14 +197,9 @@ export default function Chat() {
     setAssistantId(assistantId);
     setThreadId(threadId);
     setChatStarted(true);
-    //setIsButtonDisabled(false);
+
     console.log('Chat with assistant started successfully.');
   }
-  
-  
-
-
-  
 
   return (
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
