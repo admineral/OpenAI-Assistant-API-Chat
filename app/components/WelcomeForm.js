@@ -13,7 +13,8 @@ const WelcomeForm = ({
   handleFileChange,
   startAssistant,
   isButtonDisabled,
-  isStartLoading
+  isStartLoading,
+  statusMessage,
 }) => {
   return (
     <div className="border-gray-500 bg-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border-2 sm:w-full">
@@ -94,7 +95,12 @@ const WelcomeForm = ({
             disabled={isButtonDisabled || !assistantName || !assistantDescription || !file}
             className={`p-2 rounded-md flex justify-center items-center ${isButtonDisabled ? 'bg-gray-500 text-gray-300' : 'bg-green-500 text-white'}`}
           >
-            {isStartLoading ? <LoadingCircle /> : "Start"}
+{isStartLoading ? (
+  <div className="flex flex-col items-center space-y-2">
+    <LoadingCircle />
+    <p className="text-sm text-gray-700">{statusMessage}</p>
+  </div>
+) : "Start"}
           </button>
         </form>
       </div>

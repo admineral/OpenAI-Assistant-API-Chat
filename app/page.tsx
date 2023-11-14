@@ -55,6 +55,8 @@ export default function Chat() {
     threadId, setThreadId,
     isStartLoading, setStartLoading,
     isSending, setIsSending,
+    statusMessage, setStatusMessage,
+    counter,
   } = useChatState();
   
   
@@ -70,6 +72,7 @@ export default function Chat() {
       console.error('All fields must be filled');
       return;
     }
+    setStatusMessage('Initializing chat assistant.');
     console.log('Initializing chat assistant.');
     setStartLoading(true);
     setIsButtonDisabled(true);
@@ -86,9 +89,10 @@ export default function Chat() {
       if (file.type.startsWith('image/')) {
         console.log('Received an image file');
         const base64Image = await convertFileToBase64(file); // Ensure this function is defined elsewhere
-  
+        setStatusMessage('waiting for image description');
         console.log('Processing the image to get a text description');
         const descriptionData = await uploadImageAndGetDescription(base64Image);
+        setStatusMessage('Received image description');
         const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
         fileToUpload = new File([descriptionBlob], "description.txt");
 
@@ -103,48 +107,54 @@ export default function Chat() {
         };
         reader.readAsText(fileToUpload);
       }
-  
+
+      setStatusMessage('Uploading file data.');
       console.log('Uploading file data.');
       const uploadData = await uploadFile(fileToUpload);
       fileId = uploadData.fileId;
       console.log('File uploaded successfully, ID:', fileId);
     }
-  
+
+    setStatusMessage('Creating assistant.');
     console.log('Creating assistant.');
     const assistantData = await createAssistant(assistantName, assistantModel, assistantDescription, fileId);
     const assistantId = assistantData.assistantId;
-  
+    
+    setStatusMessage('Creating thread.');
     console.log('Creating thread.');
     const threadData = await createThread(inputmessage);
     const threadId = threadData.threadId;
-  
+    
+    setStatusMessage('Running assistant.');
     console.log('Running assistant.');
     const runAssistantData = await runAssistant(assistantId, threadId);
   
     let checkRunStatusData;
     do {
       checkRunStatusData = await checkRunStatus(threadId, runAssistantData.runId);
+      counter.current += 1; // Increment counter
+      setStatusMessage(`Running assistant - ${checkRunStatusData.status} (${counter.current} seconds elapsed)`);
       console.log('Run status:', checkRunStatusData.status);
-  
+    
       if (["cancelled", "cancelling", "failed", "expired"].includes(checkRunStatusData.status)) {
         console.error(`Run stopped due to status: ${checkRunStatusData.status}`);
         return;
       }
-  
+    
       await new Promise(resolve => setTimeout(resolve, 1000));
     } while (checkRunStatusData.status !== 'completed');
   
-    console.log('Getting messages from listMessages.');
 
     // Log the threadId and runId being used
     console.log('Using threadId:', threadId, 'and runId:', runAssistantData.runId);
-
+    console.log('Fetching messages from listMessages API endpoint.');
     const listMessagesData = await listMessages(threadId, runAssistantData.runId);
 
     // Log the entire response data
     console.log('Received data from listMessages:', listMessagesData);
 
     if (listMessagesData.ok) {
+      setStatusMessage('Done');
       console.log('Message content:', listMessagesData.messages);
       setChatMessages(prevMessages => {
         console.log('Previous messages:', prevMessages);
@@ -154,6 +164,7 @@ export default function Chat() {
       console.log('Setting isButtonDisabled to false');
       setIsButtonDisabled(false);
     } else {
+      setStatusMessage('Error retrieving messages.');
       console.error('Error fetching messages');
     }
   
@@ -224,6 +235,7 @@ export default function Chat() {
           startAssistant={startAssistant}
           isButtonDisabled={isButtonDisabled}
           isStartLoading={isStartLoading}
+          statusMessage={statusMessage}
         />
       )}
       <InputForm

@@ -1,5 +1,5 @@
 // useChatState.ts
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 export const useChatState = () => {
   const [assistantName, setAssistantName] = useState('');
@@ -14,6 +14,8 @@ export const useChatState = () => {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isStartLoading, setStartLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [statusMessage, setStatusMessage] = useState('');
+  const counter = useRef(0);
 
   return {
     assistantName, setAssistantName,
@@ -28,5 +30,7 @@ export const useChatState = () => {
     threadId, setThreadId,
     isStartLoading, setStartLoading,
     isSending, setIsSending,
+    statusMessage, setStatusMessage,
+    counter
   };
 };

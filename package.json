@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "format:write": "prettier --write \"**/*.{css,js,json,jsx,ts,tsx}\"",
-    "format": "prettier \"**/*.{css,js,json,jsx,ts,tsx}\"",
-    "test": "jest"
+    "format": "prettier \"**/*.{css,js,json,jsx,ts,tsx}\""
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.4.2",
@@ -46,10 +45,7 @@
     "@tailwindcss/typography": "^0.5.9",
     "@types/jest": "^29.5.8",
     "dotenv": "^16.3.1",
-    "jest": "^29.7.0",
     "prettier": "^3.1.0",
-    "prettier-plugin-tailwindcss": "^0.5.7",
-    "supertest": "^6.3.3",
-    "ts-jest": "^29.1.1"
+    "prettier-plugin-tailwindcss": "^0.5.7"
   }
 }
