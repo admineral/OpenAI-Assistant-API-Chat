@@ -1,7 +1,19 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileUpload } from '@fortawesome/free-solid-svg-icons';
 import { LoadingCircle } from '../icons';
+import React, { useState } from 'react';
 
+const statusToProgress = {
+  'Initializing chat assistant.': 0,
+  'Uploading image...': 10,
+  'Image upload complete.': 30,
+  'Uploading file...': 10,
+  'File upload complete.': 30,
+  'Creating assistant.': 50,
+  'Creating thread.': 70,
+  'Running assistant.': 90,
+  'Done': 100,
+};
 const WelcomeForm = ({
   assistantName,
   setAssistantName,
@@ -16,6 +28,17 @@ const WelcomeForm = ({
   isStartLoading,
   statusMessage,
 }) => {
+  const [lastProgress, setLastProgress] = useState(0);
+  const baseStatusMessage = statusMessage.replace(/ \(\d+ seconds elapsed\)$/, '');
+  let progress = statusToProgress[baseStatusMessage] || 0;
+
+  // If the current progress is 0 and the last progress is not 0,
+  // use the last progress value
+  if (progress === 0 && lastProgress !== 0) {
+    progress = lastProgress;
+  } else if (progress !== lastProgress) {
+    setLastProgress(progress);
+  }
   return (
     <div className="border-gray-500 bg-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border-2 sm:w-full">
       <div className="flex flex-col space-y-4 p-7 sm:p-10">
@@ -90,18 +113,28 @@ const WelcomeForm = ({
           </div>
 
           <button
-            type="button"
-            onClick={startAssistant}
-            disabled={isButtonDisabled || !assistantName || !assistantDescription || !file}
-            className={`p-2 rounded-md flex justify-center items-center ${isButtonDisabled ? 'bg-gray-500 text-gray-300' : 'bg-green-500 text-white'}`}
-          >
-{isStartLoading ? (
-  <div className="flex flex-col items-center space-y-2">
-    <LoadingCircle />
-    <p className="text-sm text-gray-700">{statusMessage}</p>
-  </div>
-) : "Start"}
-          </button>
+  type="button"
+  onClick={startAssistant}
+  disabled={isButtonDisabled || !assistantName || !assistantDescription || !file}
+  className={`p-2 rounded-md flex justify-center items-center relative overflow-hidden ${isButtonDisabled ? 'bg-gray-500 text-gray-300' : 'bg-green-500 text-white'}`}
+>
+  <div 
+    style={{ 
+      position: 'absolute', 
+      left: 0, 
+      top: 0, 
+      height: '100%', 
+      width: `${progress}%`, 
+      background: 'rgba(0, 0, 0, 0.2)' 
+    }} 
+  />
+  {isStartLoading ? (
+    <div className="flex flex-col items-center space-y-2">
+      <LoadingCircle />
+      <p className="text-sm text-gray-700">{statusMessage}</p>
+    </div>
+  ) : "Start"}
+</button>
         </form>
       </div>
     </div>

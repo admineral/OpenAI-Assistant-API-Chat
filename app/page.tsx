@@ -88,6 +88,7 @@ export default function Chat() {
     
       // Check if the file is an image
       if (file.type.startsWith('image/')) {
+        setStatusMessage('Uploading image...');
         console.log('Received an image file');
         try {
           const base64Image = await convertFileToBase64(file); // Ensure this function is defined elsewhere
@@ -104,7 +105,7 @@ export default function Chat() {
           // Stop the counter when the description is received
           clearInterval(intervalId);
     
-          setStatusMessage('Received image description');
+          setStatusMessage('Image upload complete.');
           const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
           fileToUpload = new File([descriptionBlob], "description.txt");
     
@@ -125,11 +126,12 @@ export default function Chat() {
         }
       }
 
-      setStatusMessage('Uploading file data.');
+      setStatusMessage('Uploading file...');
       console.log('Uploading file data.');
       const uploadData = await uploadFile(fileToUpload);
       fileId = uploadData.fileId;
       console.log('File uploaded successfully, ID:', fileId);
+      setStatusMessage('File upload complete.');
     }
 
     setStatusMessage('Creating assistant.');
@@ -189,7 +191,7 @@ export default function Chat() {
     setAssistantId(assistantId);
     setThreadId(threadId);
     setChatStarted(true);
-
+    setStatusMessage('Done');
     console.log('Chat with assistant started successfully.');
   }
 
