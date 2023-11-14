@@ -83,13 +83,7 @@ Your contributions make this project thrive. Whether it's reporting bugs, sugges
 We look forward to growing this project with the community's support and creativity!
 
 
-
-
-
-
-
-
-Code Explanation (for Developer)
+# Code Explanation (for Developers)
 
 app/page.tsx - Main Component
 
