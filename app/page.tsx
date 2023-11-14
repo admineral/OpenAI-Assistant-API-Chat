@@ -8,6 +8,7 @@ import InputForm from './components/InputForm';
 import { useRef, useState } from "react";
 import { useChat } from "ai/react";
 import va from "@vercel/analytics";
+import { convertFileToBase64 } from './utils/utils';
 import {
   uploadImageAndGetDescription,
   uploadFile,
@@ -59,18 +60,6 @@ export default function Chat() {
   const handleFileChange = (selectedFile: File) => {
     setFile(selectedFile);
   };
-
-
-  const convertFileToBase64 = (file : any) => new Promise((resolve, reject) => {
-    console.log('converting image to Base64');
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = error => reject(error);
-    console.log('image CONVERTED');
-  });
-
-
 
   // Handler for form submissions
   const handleFormSubmit = async (e:any) => {
@@ -139,6 +128,17 @@ export default function Chat() {
         const descriptionData = await uploadImageAndGetDescription(base64Image);
         const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
         fileToUpload = new File([descriptionBlob], "description.txt");
+
+        // Log the content of the description file
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          if (event.target) {
+            console.log('Description file content:', event.target.result);
+          } else {
+            console.error('Error reading file');
+          }
+        };
+        reader.readAsText(fileToUpload);
       }
   
       console.log('Uploading file data.');
