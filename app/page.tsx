@@ -84,28 +84,45 @@ export default function Chat() {
     let fileId = null;
     if (file) {
       let fileToUpload = file;
-  
+      counter.current = 0;
+    
       // Check if the file is an image
       if (file.type.startsWith('image/')) {
         console.log('Received an image file');
-        const base64Image = await convertFileToBase64(file); // Ensure this function is defined elsewhere
-        setStatusMessage('waiting for image description');
-        console.log('Processing the image to get a text description');
-        const descriptionData = await uploadImageAndGetDescription(base64Image);
-        setStatusMessage('Received image description');
-        const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
-        fileToUpload = new File([descriptionBlob], "description.txt");
-
-        // Log the content of the description file
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          if (event.target) {
-            console.log('Description file content:', event.target.result);
-          } else {
-            console.error('Error reading file');
-          }
-        };
-        reader.readAsText(fileToUpload);
+        try {
+          const base64Image = await convertFileToBase64(file); // Ensure this function is defined elsewhere
+    
+          // Start a loop to increment the counter every second
+          const intervalId = setInterval(() => {
+            counter.current += 1;
+            setStatusMessage(`Waiting for image description (${counter.current} seconds elapsed)`);
+          }, 1000);
+    
+          console.log('Processing the image to get a text description');
+          const descriptionData = await uploadImageAndGetDescription(base64Image);
+    
+          // Stop the counter when the description is received
+          clearInterval(intervalId);
+    
+          setStatusMessage('Received image description');
+          const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
+          fileToUpload = new File([descriptionBlob], "description.txt");
+    
+          // Log the content of the description file
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            if (event.target) {
+              console.log('Description file content:', event.target.result);
+            } else {
+              console.error('Error reading file');
+            }
+          };
+          reader.readAsText(fileToUpload);
+        } catch (error: any) {
+          // Log the error and update the status message
+          console.error('Error during image upload and description creation:', error);
+          setStatusMessage(`Error during image upload and description creation: ${error.message}`);
+        }
       }
 
       setStatusMessage('Uploading file data.');
@@ -130,6 +147,7 @@ export default function Chat() {
     const runAssistantData = await runAssistant(assistantId, threadId);
   
     let checkRunStatusData;
+    counter.current = 0;
     do {
       checkRunStatusData = await checkRunStatus(threadId, runAssistantData.runId);
       counter.current += 1; // Increment counter
