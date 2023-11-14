@@ -5,7 +5,7 @@
 
 Welcome to the OpenAI Assistant API Chat repository! This innovative chat application allows users to interact with an AI assistant powered by OpenAI's latest "gpt-4-1106-preview" model. It's an exciting space where technology meets conversation, offering a unique experience of AI interaction.
 
-![Image](https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/main/public/Image.png)
+![Image](https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/main/Public/Image.png)
 
 
 ## Features
