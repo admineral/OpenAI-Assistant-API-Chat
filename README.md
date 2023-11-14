@@ -8,6 +8,9 @@ Welcome to the OpenAI Assistant API Chat repository! This innovative chat applic
 ![Image](https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/main/Public/Image.png)
 
 
+<img src="Public/File_upload.gif" alt="Agent42" width="600px">
+[Agent42](https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/main/Public/File_upload)
+
 ## Features
 
 - **Personalized AI Assistant**: Customize the assistant's name, model, and description for a unique chat experience.
