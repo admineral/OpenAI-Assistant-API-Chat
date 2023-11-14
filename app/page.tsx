@@ -1,14 +1,15 @@
 //app/page.tsx
 "use client";
 
+import { useRef, useState } from "react";
+import { useChat } from "ai/react";
+import va from "@vercel/analytics";
 import LinkBar from './components/LinkBar';
 import MessageList from './components/MessageList';
 import WelcomeForm from './components/WelcomeForm';
 import InputForm from './components/InputForm';
-import { useRef, useState } from "react";
-import { useChat } from "ai/react";
-import va from "@vercel/analytics";
-import { convertFileToBase64 } from './utils/utils';
+import { convertFileToBase64 } from './utils/convertFileToBase64';
+import { useChatState } from './hooks/useChatState';
 import {
   uploadImageAndGetDescription,
   uploadFile,
@@ -18,7 +19,8 @@ import {
   checkRunStatus,
   listMessages,
   addMessage,
-} from './api';
+} from './services/api';
+
 
 // Chat component that manages the chat interface and interactions
 export default function Chat() {
@@ -40,65 +42,26 @@ export default function Chat() {
   // Determine if the chat interface should be disabled
   const disabled = isLoading || input.length === 0;
 
-  // State variables for managing various aspects of the chat assistant
-  const [assistantName, setAssistantName] = useState('');
-  const [assistantModel, setAssistantModel] = useState('gpt-3.5-turbo-1106');
-  const [assistantDescription, setAssistantDescription] = useState('');
-  const [inputmessage, setInputmessage] = useState('Introduce yourself');
-  const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
-  const [chatStarted, setChatStarted] = useState(false);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  const [file, setFile] = useState<File>();
-  const [assistantId, setAssistantId] = useState<string | null>(null);
-  const [threadId, setThreadId] = useState<string | null>(null);
-  const [isStartLoading, setStartLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
+  const {
+    assistantName, setAssistantName,
+    assistantModel, setAssistantModel,
+    assistantDescription, setAssistantDescription,
+    inputmessage, setInputmessage,
+    chatMessages, setChatMessages,
+    chatStarted, setChatStarted,
+    isButtonDisabled, setIsButtonDisabled,
+    file, setFile,
+    assistantId, setAssistantId,
+    threadId, setThreadId,
+    isStartLoading, setStartLoading,
+    isSending, setIsSending,
+  } = useChatState();
   
   
   
   // Handler for file input changes
   const handleFileChange = (selectedFile: File) => {
     setFile(selectedFile);
-  };
-
-  // Handler for form submissions
-  const handleFormSubmit = async (e:any) => {
-    e.preventDefault();
-    console.log('Handling form submission.');
-  
-    setIsSending(true);
-    setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: input }]);
-    setInput('');
-  
-    let data = { input, threadId };
-  
-    console.log('Sending message to addMessage API endpoint.');
-    const addMessageData = await addMessage(data);
-    console.log('Message sent to addMessage API endpoint.');
-  
-    console.log('Invoking runAssistant API endpoint.');
-    const runAssistantData = await runAssistant(assistantId, threadId);
-    console.log('Received response from runAssistant API endpoint.');
-  
-    let status = runAssistantData.status;
-    while (status !== 'completed') {
-      const statusData = await checkRunStatus(threadId, runAssistantData.runId);
-      status = statusData.status;
-      console.log('Checking assistant response status:', status);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  
-    console.log('Fetching messages from listMessages API endpoint.');
-    const listMessagesData = await listMessages(threadId, runAssistantData.runId);
-    console.log('Messages retrieved from listMessages API endpoint.');
-    setIsSending(false);
-  
-    if (listMessagesData.ok) {
-      console.log('Adding assistant\'s message to the chat.');
-      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: listMessagesData.messages }]);
-    } else {
-      console.error('Error retrieving messages:', listMessagesData.error);
-    }
   };
 
 
@@ -200,6 +163,48 @@ export default function Chat() {
 
     console.log('Chat with assistant started successfully.');
   }
+
+  // Handler for form submissions
+  const handleFormSubmit = async (e:any) => {
+    e.preventDefault();
+    console.log('Handling form submission.');
+  
+    setIsSending(true);
+    setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: input }]);
+    setInput('');
+  
+    let data = { input, threadId };
+  
+    console.log('Sending message to addMessage API endpoint.');
+    const addMessageData = await addMessage(data);
+    console.log('Message sent to addMessage API endpoint.');
+  
+    console.log('Invoking runAssistant API endpoint.');
+    const runAssistantData = await runAssistant(assistantId, threadId);
+    console.log('Received response from runAssistant API endpoint.');
+  
+    let status = runAssistantData.status;
+    while (status !== 'completed') {
+      const statusData = await checkRunStatus(threadId, runAssistantData.runId);
+      status = statusData.status;
+      console.log('Checking assistant response status:', status);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  
+    console.log('Fetching messages from listMessages API endpoint.');
+    const listMessagesData = await listMessages(threadId, runAssistantData.runId);
+    console.log('Messages retrieved from listMessages API endpoint.');
+    setIsSending(false);
+  
+    if (listMessagesData.ok) {
+      console.log('Adding assistant\'s message to the chat.');
+      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: listMessagesData.messages }]);
+    } else {
+      console.error('Error retrieving messages:', listMessagesData.error);
+    }
+  };
+
+
 
   return (
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">

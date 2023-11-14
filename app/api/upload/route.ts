@@ -1,5 +1,5 @@
 /**
- * API Route - Start Chat Session
+ * API Route - Upload Files
  * 
  * This API route is designed for initiating a chat session within an application.
  * It handles the processing and uploading of a file necessary for starting a chat session
@@ -7,7 +7,7 @@
  * temporarily saves it, and then uploads it to OpenAI, ultimately returning the
  * file ID for use in further chat-related operations.
  * 
- * Path: /api/startChat
+ * Path: /api/upload
  */
 
 import { NextRequest, NextResponse } from 'next/server';

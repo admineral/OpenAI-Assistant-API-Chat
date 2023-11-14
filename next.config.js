@@ -15,10 +15,7 @@ const nextConfig = {
     ];
   },
 
-  // Adding the experimental configuration
-  experimental: {
-    fetch: true,
-  },
+
 };
 
 module.exports = nextConfig;
