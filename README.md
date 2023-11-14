@@ -4,10 +4,6 @@
 
 Welcome to the OpenAI Assistant API Chat repository! This innovative chat application allows users to interact with an AI assistant powered by OpenAI's latest "gpt-4-1106-preview" model. It's an exciting space where technology meets conversation, offering a unique experience of AI interaction.
 
-
-<img src="https://raw.githubusercontent.com/admineral/OpenAI-Assistant-API-Chat/main/Public/Image.png" width="600">
-
-
 # Demo
 In the demo, you can see the AI assistant in action.
 [LIVE DEMO](https://open-ai-assistant-api-chat.vercel.app)
