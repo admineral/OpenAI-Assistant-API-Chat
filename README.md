@@ -1,5 +1,5 @@
 # OpenAI Assistant API Chat
-![Image](https://raw.githubusercontent.com/admineral/OpenAI-Assistant-API-Chat/main/Public/Image.png)
+<img src="https://raw.githubusercontent.com/admineral/OpenAI-Assistant-API-Chat/main/Public/Image.png" width="600">
 
 ## Introduction
 
@@ -9,7 +9,9 @@ Welcome to the OpenAI Assistant API Chat repository! This innovative chat applic
 
 
 <img src="Public/File_upload.gif" alt="Agent42" width="600px">
-#[LIVE DEMO](https://open-ai-assistant-api-chat.vercel.app)
+[LIVE DEMO](https://open-ai-assistant-api-chat.vercel.app)
+
+
 ## Features
 
 - **Personalized AI Assistant**: Customize the assistant's name, model, and description for a unique chat experience.
@@ -26,13 +28,12 @@ Welcome to the OpenAI Assistant API Chat repository! This innovative chat applic
 <img src="Public/Image_upload.gif" alt="Agent42" width="600px">
 [GPT4-Vision api router ](https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/main/app/api/upload_gpt4v/route.ts)
 
-#############################################################
+
 
 ## Beta & Work in Progress
 
 Please note that this application is currently in the beta phase and is continuously evolving. We are working diligently to enhance the user experience and add new features. During this phase, you may encounter some hiccups or unexpected behavior.
 
-#############################################################
 
 ## Getting Started
 
