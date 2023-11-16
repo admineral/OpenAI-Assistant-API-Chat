@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import Textarea from 'react-textarea-autosize';
 import { SendIcon, LoadingCircle } from '../icons'; 
 
-const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disabled, chatStarted, isSending }) => {
+const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disabled, chatStarted, isSending, isLoading }) => {
   return (
     <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
       <form
@@ -31,7 +31,7 @@ const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disab
         <button
           className={clsx(
             "absolute inset-y-0 right-3 my-auto flex h-8 w-8 items-center justify-center rounded-md transition-all",
-            disabled || !chatStarted
+            disabled || !chatStarted || input.trim().length === 0
               ? "cursor-not-allowed bg-white"
               : "bg-green-500 hover:bg-green-600",
           )}

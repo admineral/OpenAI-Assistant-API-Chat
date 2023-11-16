@@ -4,7 +4,7 @@ import { LoadingCircle } from '../icons';
 import React, { useState } from 'react';
 
 const statusToProgress = {
-  'Initializing chat assistant.': 0,
+  'Initializing chat assistant.': 5,
   'Uploading image...': 10,
   'Image upload complete.': 30,
   'Uploading file...': 10,

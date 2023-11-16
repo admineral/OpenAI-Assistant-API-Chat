@@ -27,10 +27,15 @@ export default function Chat() {
   // Initialize ChatManager only once using useEffect
   const [chatManager, setChatManager] = useState<ChatManager | null>(null);
   
+  // Add a state to track loading status of message sending
+  const [isMessageLoading, setIsMessageLoading] = useState(false);
+
   useEffect(() => {
-    const manager = ChatManager.getInstance(setChatMessages);
-    setChatManager(manager);
-  }, [setChatMessages]);
+    const chatManagerInstance = ChatManager.getInstance(setChatMessages, setStatusMessage);
+    setChatManager(chatManagerInstance);
+    // Update isMessageLoading based on the chatManager's isLoading state
+    setIsMessageLoading(chatManagerInstance.getChatState().isLoading);
+  }, [setChatMessages, setStatusMessage]);
 
   // Update chat state and handle assistant response reception
 
@@ -56,10 +61,14 @@ export default function Chat() {
     e.preventDefault();
     if (chatManager) {
       try {
+        setIsMessageLoading(true); // Set loading to true when sending starts
         await chatManager.sendMessage(inputmessage);
         setInputmessage('');
+        setIsMessageLoading(false); // Set loading to false when sending ends
+        
       } catch (error) {
         console.error('Error sending message:', error);
+        setIsMessageLoading(false); // Ensure loading is set to false in case of an error
       }
     }
   };
@@ -74,7 +83,7 @@ export default function Chat() {
       ) : (
         <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, file, handleFileChange, startAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
       )}
-      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending: isStartLoading}} />
+      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending: isMessageLoading, isLoading: isMessageLoading}} />
     </main>
   );
 }
