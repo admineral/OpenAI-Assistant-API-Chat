@@ -4,16 +4,21 @@ import { LoadingCircle } from '../icons';
 import React, { useState } from 'react';
 
 const statusToProgress = {
-  'Initializing chat assistant.': 5,
-  'Uploading image...': 10,
-  'Image upload complete.': 30,
-  'Uploading file...': 10,
-  'File upload complete.': 30,
-  'Creating assistant.': 50,
-  'Creating thread.': 70,
-  'Running assistant.': 90,
+  'Initializing chat assistant...': 5,
+  'Starting upload...': 15,
+  'Upload complete..': 25,
+  'Create Assistant...': 35,
+  'Assistant created...': 45,
+  'Creating thread...': 55,
+  'Thread created...': 65,
+  'Running assistant...': 75,
+  'checking status...': 85,
+  'Run completed...': 90,
+  'Received messages...': 95,
+  'Adding messages to chat...': 98,
   'Done': 100,
 };
+
 const WelcomeForm = ({
   assistantName,
   setAssistantName,

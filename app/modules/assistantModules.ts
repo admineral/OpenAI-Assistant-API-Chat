@@ -1,6 +1,8 @@
 // Type: Module
 // assistantModules.ts
+import { convertFileToBase64 } from '../utils/convertFileToBase64';
 import {
+  uploadImageAndGetDescription,
   uploadFile,
   createAssistant,
   createThread,
@@ -34,6 +36,27 @@ interface ThreadDataResponse {
 */
 export const prepareUploadFile = async (file: File): Promise<string> => {
   console.log('Preparing file for upload...');
+
+  // If the file is an image, get a description from GPT-4 Vision API
+  if (file.type.startsWith('image/')) {
+    console.log('File is an image, getting description...');
+    const base64Image = await convertFileToBase64(file);
+    const descriptionResponse = await uploadImageAndGetDescription(base64Image);
+    console.log('Image description:', descriptionResponse.analysis);
+
+    // Create a Blob from the description
+    const descriptionBlob = new Blob([descriptionResponse.analysis], { type: 'text/plain' });
+
+    // Create a File object from the Blob
+    const descriptionFile = new File([descriptionBlob], 'description.txt');
+
+    // Upload the description file
+    const uploadedFile: UploadedFileResponse = await uploadFile(descriptionFile);
+    console.log('Description file uploaded successfully. File ID:', uploadedFile.fileId);
+    return uploadedFile.fileId;
+  }
+
+  // If the file is not an image, upload it as a normal file
   const uploadedFile: UploadedFileResponse = await uploadFile(file);
   console.log('File uploaded successfully. File ID:', uploadedFile.fileId);
   return uploadedFile.fileId;
