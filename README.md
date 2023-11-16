@@ -11,7 +11,7 @@ Welcome to the OpenAI Assistant API Chat repository! This innovative chat applic
 In the demo, you can see the AI assistant in action.
 [LIVE DEMO](https://open-ai-assistant-api-chat.vercel.app)
 
-
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fadmineral%2FOpenAI-Assistant-API-Chat&env=OPENAI_API_KEY&envDescription=OpenAI%20API%20Key&envLink=https%3A%2F%2Fplatform.openai.com%2Faccount%2Fapi-keys&project-name=openai-assistant-api-chat&repository-name=OpenAI-Assistant-API-Chat)
 
 ## Features
 
@@ -93,11 +93,11 @@ export default function Chat() {
 - **Key Features**:
   - Manages chat state using custom hooks.
   - Handles file inputs for initiating the assistant.
-  - Triggers assistant-related functions like `startAssistant` and `handleFormSubmit`.
+  - Triggers assistant-related functions like `startChatAssistant` and `handleFormSubmit`.
 
-### `startAssistant` Function
+### `startChatAssistant` Function
 ```tsx
-async function startAssistant() {
+async function startChatAssistant() {
   // ... Function logic
 }
 ```
@@ -155,7 +155,7 @@ This application features a chat interface that interacts with an AI assistant. 
 - **Functionality**: Serves as the primary interface for the chat application.
 - **Key Elements**:
   - **`Chat` Component**: Orchestrates the entire chat interface.
-  - **`startAssistant` Function**: Initializes the chat assistant, managing file uploads and assistant interactions.
+  - **`startChatAssistant` Function**: Initializes the chat assistant, managing file uploads and assistant interactions.
   - **`handleFormSubmit` Function**: Handles sending user messages and displaying assistant responses.
   - **Custom Hook (`useChatState`)**: Manages state variables for the chat, including assistant details and chat messages.
   - **Sub-Components**: Includes `WelcomeForm` for initial setup, `InputForm` for message input, and `MessageList` for displaying chat messages.
@@ -182,7 +182,7 @@ This application features a chat interface that interacts with an AI assistant. 
 
 ### Functional Flow
 1. **Initialization (WelcomeForm)**: User inputs details and initiates the assistant.
-2. **Assistant Setup (`startAssistant`)**: The assistant is set up, including file uploads and thread creation.
+2. **Assistant Setup (`startChatAssistant`)**: The assistant is set up, including file uploads and thread creation.
 3. **Message Handling (`handleFormSubmit`)**: User messages are sent, and responses are fetched and displayed.
 4. **State Management (`useChatState`)**: Maintains the overall state of the chat, including messages and statuses.
 5. **API Interactions (`api.js` Services)**: Communicate with backend services for various functionalities like uploading files, creating assistants, and fetching messages.

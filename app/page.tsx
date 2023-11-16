@@ -20,8 +20,12 @@ export default function Chat() {
     file = null, setFile,
     isStartLoading, setStartLoading,
     statusMessage, setStatusMessage,
+    isSending, setIsSending,
     inputRef,
-    formRef
+    formRef,
+    initialThreadMessage, 
+    setInitialThreadMessage
+
   } = useChatState();
 
   // Initialize ChatManager only once using useEffect
@@ -40,12 +44,12 @@ export default function Chat() {
   // Update chat state and handle assistant response reception
 
 
-  const startAssistant = async () => {
+  const startChatAssistant = async () => {
     setIsButtonDisabled(true);
     setStartLoading(true);
     if (chatManager) {
       try {
-        await chatManager.startAssistant({ assistantName, assistantModel, assistantDescription }, file, inputmessage);
+        await chatManager.startAssistant({ assistantName, assistantModel, assistantDescription }, file, initialThreadMessage);
         console.log('Assistant started:', chatManager.getChatState());
       } catch (error) {
         console.error('Error starting assistant:', error);
@@ -59,20 +63,27 @@ export default function Chat() {
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // If a message is being sent, return immediately
+    if (isSending) {
+      return;
+    }
+    // Save the message
+    const message = inputmessage;
+    // Clear the input
+    setInputmessage('');
+    // Disable sending
+    setIsSending(true);
     if (chatManager) {
       try {
-        setIsMessageLoading(true); // Set loading to true when sending starts
-        await chatManager.sendMessage(inputmessage);
-        setInputmessage('');
-        setIsMessageLoading(false); // Set loading to false when sending ends
-        
+        await chatManager.sendMessage(message);
       } catch (error) {
         console.error('Error sending message:', error);
-        setIsMessageLoading(false); // Ensure loading is set to false in case of an error
+      } finally {
+        // Enable sending
+        setIsSending(false);
       }
     }
   };
-
   const handleFileChange = (selectedFile: File) => setFile(selectedFile);
 
   return (
@@ -81,9 +92,9 @@ export default function Chat() {
       {chatMessages.length > 0 ? (
         <MessageList chatMessages={chatMessages} />
       ) : (
-        <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, file, handleFileChange, startAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
+        <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, file, handleFileChange, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
       )}
-      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending: isMessageLoading, isLoading: isMessageLoading}} />
+      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending, isLoading: isMessageLoading}} />
     </main>
   );
 }

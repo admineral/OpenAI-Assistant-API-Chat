@@ -23,8 +23,9 @@ interface ChatState {
   isLoading: boolean;
   error: Error | null;
   runId: string | null; 
-  setChatMessages: (messages: any[]) => void;
   assistantResponseReceived: boolean;
+  isSending: boolean;
+  setChatMessages: (messages: any[]) => void;
   setStatusMessage: (message: string) => void;
 }
 
@@ -44,8 +45,9 @@ class ChatManager {
       isLoading: false,
       error: null,
       runId: null,
-      setChatMessages: setChatMessages,
       assistantResponseReceived: false,
+      isSending: false,
+      setChatMessages: setChatMessages,
       setStatusMessage: setStatusMessage,
     };
     console.log('ChatManager initialized');
@@ -127,7 +129,7 @@ class ChatManager {
   async sendMessage(input: string): Promise<void> {
 
     console.log('Sending message...');
-    this.state.isLoading = true;
+    this.state.isSending = true; 
 
     // Create new user message and add it to the state
     const newUserMessage = { role: 'user', content: input };
@@ -166,7 +168,7 @@ class ChatManager {
       this.state.error = error as Error;
       console.error('Error in sending message:', error);
     } finally {
-      this.state.isLoading = false; // Set loading to false when sending ends
+      this.state.isSending = false; // Set loading to false when sending ends
     }
   }
 

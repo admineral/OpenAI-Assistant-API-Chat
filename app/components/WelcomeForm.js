@@ -23,7 +23,7 @@ const WelcomeForm = ({
   setAssistantModel,
   file,
   handleFileChange,
-  startAssistant,
+  startChatAssistant,
   isButtonDisabled,
   isStartLoading,
   statusMessage,
@@ -114,7 +114,7 @@ const WelcomeForm = ({
 
           <button
   type="button"
-  onClick={startAssistant}
+  onClick={startChatAssistant}
   disabled={isButtonDisabled || !assistantName || !assistantDescription || !file}
   className={`p-2 rounded-md flex justify-center items-center relative overflow-hidden ${isButtonDisabled ? 'bg-gray-500 text-gray-300' : 'bg-green-500 text-white'}`}
 >

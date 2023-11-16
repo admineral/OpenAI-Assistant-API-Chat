@@ -13,13 +13,13 @@
   - **Methods**:
     - `public getCurrentMessages()`: Returns the current chat messages.
     - `public static getInstance(...)`: Singleton pattern to get an instance of `ChatManager`.
-    - `async startAssistant(...)`: Starts the chat assistant and initializes the chat.
+    - `async startChatAssistant(...)`: Starts the chat assistant and initializes the chat.
     - `async sendMessage(input: string)`: Sends a message to the assistant and updates the chat state.
     - `getChatState()`: Returns the current chat state.
 
 ### Key Functions
 - **Interaction with Assistant**:
-  - The `startAssistant` method initializes the assistant with given details and starts a chat thread.
+  - The `startChatAssistant` method initializes the assistant with given details and starts a chat thread.
   - The `sendMessage` method allows sending messages to the assistant and receiving responses.
 
 - **State Management**:
@@ -30,14 +30,14 @@
   - `ChatManager` uses a singleton pattern, ensuring only one instance of the class is created and used throughout the application.
 
 - **Error Handling**:
-  - Errors are caught and managed in the methods, particularly in `startAssistant` and `sendMessage`.
+  - Errors are caught and managed in the methods, particularly in `startChatAssistant` and `sendMessage`.
 
 ### Usage Example
 To use `ChatManager`, you would typically get the singleton instance and then use its methods to start the assistant and manage chat messages:
 
 ```typescript
 const chatManager = ChatManager.getInstance(setChatMessagesFunction);
-chatManager.startAssistant(assistantDetails, file, initialMessage);
+chatManager.startChatAssistant(assistantDetails, file, initialMessage);
 ```
 
 Here, `setChatMessagesFunction` is a function that updates your chat UI with new messages.
