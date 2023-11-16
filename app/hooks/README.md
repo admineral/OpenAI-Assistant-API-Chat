@@ -26,14 +26,5 @@ The `useChatState` hook, located in the `/hooks` folder, is a custom React hook 
 ### Usage
 This hook is used to streamline the state management across the chat application, particularly in components that handle user interactions, message displays, and the overall chat flow.
 
-## Best Practices
-- Keep the state variables focused and relevant to the chat application's requirements.
-- Ensure synchronization between the states managed by this hook and other parts of the application.
-
-## Contribution Guidelines
-- When adding new state variables, ensure they are integral to the chat's functionality.
-- Maintain the naming convention for consistency and readability.
-- Test thoroughly to ensure new states integrate smoothly with existing ones.
-
 ## Conclusion
 The `useChatState` hook is a foundational part of the chat application, providing a centralized and efficient way to manage the application's state. Its proper use is crucial for maintaining the application's reactivity and user experience.

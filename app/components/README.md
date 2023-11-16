@@ -1,4 +1,4 @@
-# README for `components` Folder in Chat Application
+# README for `components` 
 
 ## Overview
 The `components` folder contains React components essential for the user interface of our chat application. Each component is designed to fulfill specific roles within the application, enhancing user interaction and experience.
@@ -64,15 +64,6 @@ This form is presented to the user at the beginning of the chat session to confi
 
 ---
 
-## Best Practices
-- Ensure each component maintains its designated purpose and does not handle unrelated logic.
-- Keep the components reusable and maintainable.
-- Follow accessibility guidelines for user interface elements.
-
-## Contribution Guidelines
-- Adhere to existing coding and styling conventions in the project.
-- Document any significant changes or additions to the components.
-- Test new changes thoroughly to ensure they integrate seamlessly with existing components.
 
 ## Conclusion
 The `components` folder contains essential building blocks of the user interface for our chat application. Proper understanding and usage of these components are key to enhancing the application's functionality and user experience.
