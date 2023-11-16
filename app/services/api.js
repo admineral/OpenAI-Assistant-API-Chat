@@ -77,8 +77,9 @@ export const uploadImageAndGetDescription = async (base64Image) => {
       console.error('Failed to run assistant');
       throw new Error('Failed to run assistant');
     }
-    console.log('Assistant run successfully');
-    return await response.json();
+    const data = await response.json();
+    console.log('Assistant run successfully. Run ID:', data.runId);
+    return data;
   };
   
   // Checks the status of a run

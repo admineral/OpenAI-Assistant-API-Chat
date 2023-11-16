@@ -16,6 +16,8 @@ export const useChatState = () => {
   const [isSending, setIsSending] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const counter = useRef(0);
+  const inputRef = useRef(null);
+  const formRef = useRef(null);
 
   return {
     assistantName, setAssistantName,
@@ -31,6 +33,8 @@ export const useChatState = () => {
     isStartLoading, setStartLoading,
     isSending, setIsSending,
     statusMessage, setStatusMessage,
-    counter
+    counter,
+    inputRef,
+    formRef
   };
 };

@@ -1,241 +1,70 @@
-//app/page.tsx
+// app/page.tsx
 "use client";
 
-import { useRef, useState } from "react";
-import { useChat } from "ai/react";
-import va from "@vercel/analytics";
+import React, { useState, useEffect, useRef } from "react";
+import ChatManager from './services/ChatManager';
 import LinkBar from './components/LinkBar';
 import MessageList from './components/MessageList';
 import WelcomeForm from './components/WelcomeForm';
 import InputForm from './components/InputForm';
-import { convertFileToBase64 } from './utils/convertFileToBase64';
 import { useChatState } from './hooks/useChatState';
-import {
-  uploadImageAndGetDescription,
-  uploadFile,
-  createAssistant,
-  createThread,
-  runAssistant,
-  checkRunStatus,
-  listMessages,
-  addMessage,
-} from './services/api';
 
-
-// Chat component that manages the chat interface and interactions
 export default function Chat() {
-  // Refs for form and input elements
-  const formRef = useRef<HTMLFormElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-
-  // Custom hook to manage chat state and interactions
-  const { input, setInput, isLoading} = useChat({
-    // Error handling callback
-    onError: (error) => {
-      va.track("Chat errored", {
-        input,
-        error: error.message,
-      });
-    },
-  });
-
-  // Determine if the chat interface should be disabled
-  const disabled = isLoading || input.length === 0;
-
   const {
     assistantName, setAssistantName,
     assistantModel, setAssistantModel,
     assistantDescription, setAssistantDescription,
     inputmessage, setInputmessage,
     chatMessages, setChatMessages,
-    chatStarted, setChatStarted,
     isButtonDisabled, setIsButtonDisabled,
-    file, setFile,
-    assistantId, setAssistantId,
-    threadId, setThreadId,
+    file = null, setFile,
     isStartLoading, setStartLoading,
-    isSending, setIsSending,
     statusMessage, setStatusMessage,
-    counter,
+    inputRef,
+    formRef
   } = useChatState();
+
+  // Initialize ChatManager only once using useEffect
+  const [chatManager, setChatManager] = useState<ChatManager | null>(null);
   
-  
-  
-  // Handler for file input changes
-  const handleFileChange = (selectedFile: File) => {
-    setFile(selectedFile);
-  };
+  useEffect(() => {
+    const manager = ChatManager.getInstance(setChatMessages);
+    setChatManager(manager);
+  }, [setChatMessages]);
+
+  // Update chat state and handle assistant response reception
 
 
-  async function startAssistant() {
-    if (!assistantName || !assistantModel || !assistantDescription || !inputmessage) {
-      console.error('All fields must be filled');
-      return;
-    }
-    setStatusMessage('Initializing chat assistant.');
-    console.log('Initializing chat assistant.');
-    setStartLoading(true);
+  const startAssistant = async () => {
     setIsButtonDisabled(true);
-  
-    // Preparing file data for upload
-    const fileInput = document.getElementById('file-input') as HTMLInputElement;
-    const file = fileInput && fileInput.files ? fileInput.files[0] : null;
-  
-    let fileId = null;
-    if (file) {
-      let fileToUpload = file;
-      counter.current = 0;
-    
-      // Check if the file is an image
-      if (file.type.startsWith('image/')) {
-        setStatusMessage('Uploading image...');
-        console.log('Received an image file');
-        try {
-          const base64Image = await convertFileToBase64(file); // Ensure this function is defined elsewhere
-    
-          // Start a loop to increment the counter every second
-          const intervalId = setInterval(() => {
-            counter.current += 1;
-            setStatusMessage(`Waiting for image description (${counter.current} seconds elapsed)`);
-          }, 1000);
-    
-          console.log('Processing the image to get a text description');
-          const descriptionData = await uploadImageAndGetDescription(base64Image);
-    
-          // Stop the counter when the description is received
-          clearInterval(intervalId);
-    
-          setStatusMessage('Image upload complete.');
-          const descriptionBlob = new Blob([descriptionData.analysis], { type: 'text/plain' });
-          fileToUpload = new File([descriptionBlob], "description.txt");
-    
-          // Log the content of the description file
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            if (event.target) {
-              console.log('Description file content:', event.target.result);
-            } else {
-              console.error('Error reading file');
-            }
-          };
-          reader.readAsText(fileToUpload);
-        } catch (error: any) {
-          // Log the error and update the status message
-          console.error('Error during image upload and description creation:', error);
-          setStatusMessage(`Error during image upload and description creation: ${error.message}`);
-        }
+    setStartLoading(true);
+    if (chatManager) {
+      try {
+        await chatManager.startAssistant({ assistantName, assistantModel, assistantDescription }, file, inputmessage);
+        console.log('Assistant started:', chatManager.getChatState());
+      } catch (error) {
+        console.error('Error starting assistant:', error);
+        if (error instanceof Error) setStatusMessage(`Error: ${error.message}`);
+      } finally {
+        setIsButtonDisabled(false);
+        setStartLoading(false);
       }
-
-      setStatusMessage('Uploading file...');
-      console.log('Uploading file data.');
-      const uploadData = await uploadFile(fileToUpload);
-      fileId = uploadData.fileId;
-      console.log('File uploaded successfully, ID:', fileId);
-      setStatusMessage('File upload complete.');
-    }
-
-    setStatusMessage('Creating assistant.');
-    console.log('Creating assistant.');
-    const assistantData = await createAssistant(assistantName, assistantModel, assistantDescription, fileId);
-    const assistantId = assistantData.assistantId;
-    
-    setStatusMessage('Creating thread.');
-    console.log('Creating thread.');
-    const threadData = await createThread(inputmessage);
-    const threadId = threadData.threadId;
-    
-    setStatusMessage('Running assistant.');
-    console.log('Running assistant.');
-    const runAssistantData = await runAssistant(assistantId, threadId);
-  
-    let checkRunStatusData;
-    counter.current = 0;
-    do {
-      checkRunStatusData = await checkRunStatus(threadId, runAssistantData.runId);
-      counter.current += 1; // Increment counter
-      setStatusMessage(`Running assistant - ${checkRunStatusData.status} (${counter.current} seconds elapsed)`);
-      console.log('Run status:', checkRunStatusData.status);
-    
-      if (["cancelled", "cancelling", "failed", "expired"].includes(checkRunStatusData.status)) {
-        console.error(`Run stopped due to status: ${checkRunStatusData.status}`);
-        return;
-      }
-    
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } while (checkRunStatusData.status !== 'completed');
-  
-
-    // Log the threadId and runId being used
-    console.log('Using threadId:', threadId, 'and runId:', runAssistantData.runId);
-    console.log('Fetching messages from listMessages API endpoint.');
-    const listMessagesData = await listMessages(threadId, runAssistantData.runId);
-
-    // Log the entire response data
-    console.log('Received data from listMessages:', listMessagesData);
-
-    if (listMessagesData.ok) {
-      setStatusMessage('Done');
-      console.log('Message content:', listMessagesData.messages);
-      setChatMessages(prevMessages => {
-        console.log('Previous messages:', prevMessages);
-        console.log('Adding new messages to chat');
-        return [...prevMessages, { role: 'assistant', content: listMessagesData.messages }];
-      });
-      console.log('Setting isButtonDisabled to false');
-      setIsButtonDisabled(false);
-    } else {
-      setStatusMessage('Error retrieving messages.');
-      console.error('Error fetching messages');
-    }
-  
-    setAssistantId(assistantId);
-    setThreadId(threadId);
-    setChatStarted(true);
-    setStatusMessage('Done');
-    console.log('Chat with assistant started successfully.');
-  }
-
-  // Handler for form submissions
-  const handleFormSubmit = async (e:any) => {
-    e.preventDefault();
-    console.log('Handling form submission.');
-  
-    setIsSending(true);
-    setChatMessages(prevMessages => [...prevMessages, { role: 'user', content: input }]);
-    setInput('');
-  
-    let data = { input, threadId };
-  
-    console.log('Sending message to addMessage API endpoint.');
-    const addMessageData = await addMessage(data);
-    console.log('Message sent to addMessage API endpoint.');
-  
-    console.log('Invoking runAssistant API endpoint.');
-    const runAssistantData = await runAssistant(assistantId, threadId);
-    console.log('Received response from runAssistant API endpoint.');
-  
-    let status = runAssistantData.status;
-    while (status !== 'completed') {
-      const statusData = await checkRunStatus(threadId, runAssistantData.runId);
-      status = statusData.status;
-      console.log('Checking assistant response status:', status);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  
-    console.log('Fetching messages from listMessages API endpoint.');
-    const listMessagesData = await listMessages(threadId, runAssistantData.runId);
-    console.log('Messages retrieved from listMessages API endpoint.');
-    setIsSending(false);
-  
-    if (listMessagesData.ok) {
-      console.log('Adding assistant\'s message to the chat.');
-      setChatMessages(prevMessages => [...prevMessages, { role: 'assistant', content: listMessagesData.messages }]);
-    } else {
-      console.error('Error retrieving messages:', listMessagesData.error);
     }
   };
 
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (chatManager) {
+      try {
+        await chatManager.sendMessage(inputmessage);
+        setInputmessage('');
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+  };
 
+  const handleFileChange = (selectedFile: File) => setFile(selectedFile);
 
   return (
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
@@ -243,31 +72,9 @@ export default function Chat() {
       {chatMessages.length > 0 ? (
         <MessageList chatMessages={chatMessages} />
       ) : (
-        <WelcomeForm
-          assistantName={assistantName}
-          setAssistantName={setAssistantName}
-          assistantDescription={assistantDescription}
-          setAssistantDescription={setAssistantDescription}
-          assistantModel={assistantModel}
-          setAssistantModel={setAssistantModel}
-          file={file}
-          handleFileChange={handleFileChange}
-          startAssistant={startAssistant}
-          isButtonDisabled={isButtonDisabled}
-          isStartLoading={isStartLoading}
-          statusMessage={statusMessage}
-        />
+        <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, file, handleFileChange, startAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
       )}
-      <InputForm
-        input={input}
-        setInput={setInput}
-        handleFormSubmit={handleFormSubmit}
-        inputRef={inputRef}
-        formRef={formRef}
-        disabled={disabled}
-        chatStarted={chatStarted}
-        isSending={isSending}
-      />
+      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending: isStartLoading}} />
     </main>
   );
-};
+}
