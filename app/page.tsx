@@ -24,15 +24,22 @@ export default function Chat() {
     inputRef,
     formRef,
     initialThreadMessage, 
-    setInitialThreadMessage
+    setInitialThreadMessage,
+    setChatStarted,
+    chatStarted: chatHasStarted,
+
 
   } = useChatState();
 
   // Initialize ChatManager only once using useEffect
-  const [chatManager, setChatManager] = useState<ChatManager | null>(null);
-  
-  // Add a state to track loading status of message sending
-  const [isMessageLoading, setIsMessageLoading] = useState(false);
+// Initialize ChatManager only once using useEffect
+const [chatManager, setChatManager] = useState<ChatManager | null>(null);
+
+// Set assistantId from environment variable
+const [assistantId, setAssistantId] = useState<string | null>(process.env.REACT_APP_ASSISTANT_ID || '');
+
+// Add a state to track loading status of message sending
+const [isMessageLoading, setIsMessageLoading] = useState(false);
 
   useEffect(() => {
     const chatManagerInstance = ChatManager.getInstance(setChatMessages, setStatusMessage);
@@ -41,7 +48,14 @@ export default function Chat() {
     setIsMessageLoading(chatManagerInstance.getChatState().isLoading);
   }, [setChatMessages, setStatusMessage]);
 
-  // Update chat state and handle assistant response reception
+  useEffect(() => {
+    if (assistantId && chatManager) {
+      console.log('Assistant ID found:', assistantId);
+      chatManager.startAssistantWithId(assistantId, initialThreadMessage);
+    } else {
+      console.warn('Assistant ID not found');
+    }
+  }, [assistantId, chatManager, initialThreadMessage]);
 
 
   const startChatAssistant = async () => {
@@ -51,6 +65,7 @@ export default function Chat() {
       try {
         await chatManager.startAssistant({ assistantName, assistantModel, assistantDescription }, file, initialThreadMessage);
         console.log('Assistant started:', chatManager.getChatState());
+        setChatStarted(true);
       } catch (error) {
         console.error('Error starting assistant:', error);
         if (error instanceof Error) setStatusMessage(`Error: ${error.message}`);
@@ -89,7 +104,7 @@ export default function Chat() {
   return (
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
       <LinkBar />
-      {chatMessages.length > 0 ? (
+      {chatHasStarted || assistantId ? (
         <MessageList chatMessages={chatMessages} />
       ) : (
         <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, file, handleFileChange, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
