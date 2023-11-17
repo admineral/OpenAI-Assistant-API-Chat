@@ -34,8 +34,9 @@ const Message = ({ message }) => (
   </div>
 );
 
-const MessageList = ({ chatMessages }) => (
+const MessageList = ({ chatMessages, statusMessage }) => (
   <>
+    <div>{statusMessage}</div>
     {chatMessages.map((message, i) => (
       <Message key={i} message={message} />
     ))}

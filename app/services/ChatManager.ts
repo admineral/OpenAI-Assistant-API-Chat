@@ -27,6 +27,7 @@ interface ChatState {
   isSending: boolean;
   setChatMessages: (messages: any[]) => void;
   setStatusMessage: (message: string) => void;
+  statusMessage:string;
 }
 
 /**
@@ -49,6 +50,7 @@ class ChatManager {
       isSending: false,
       setChatMessages: setChatMessages,
       setStatusMessage: setStatusMessage,
+      statusMessage: '',
     };
     console.log('ChatManager initialized');
   }
@@ -110,7 +112,7 @@ class ChatManager {
         const runId = this.state.runId as string;
         const threadId = this.state.threadId as string;
         this.state.setStatusMessage('checking status...');
-        const assistantResponse = await fetchAssistantResponse(runId, threadId);
+        const assistantResponse = await fetchAssistantResponse(runId, threadId, this.state.setStatusMessage);
         
         this.state.setStatusMessage('Run complete...');
         this.state.assistantResponseReceived = true;
@@ -127,8 +129,8 @@ class ChatManager {
       }
   
     } catch (error) {
-      this.state.setStatusMessage('Error!');
       this.state.error = error as Error;
+      this.state.setStatusMessage(`Error: ${this.state.error.message}`);
       console.error('Error in starting assistant:', error);
     } finally {
       this.state.setStatusMessage('Done');
@@ -160,7 +162,7 @@ class ChatManager {
         const runId = this.state.runId as string;
         const threadId = this.state.threadId as string;
         this.state.setStatusMessage('checking status...');
-        const assistantResponse = await fetchAssistantResponse(runId, threadId);
+        const assistantResponse = await fetchAssistantResponse(runId, threadId, this.state.setStatusMessage);
         
         this.state.setStatusMessage('Run complete...');
         this.state.assistantResponseReceived = true;
@@ -195,13 +197,13 @@ class ChatManager {
     try {
       if (this.state.threadId && this.state.assistantId) { 
         
-        await submitUserMessage(input, this.state.threadId);
+        await submitUserMessage(input, this.state.threadId, this.state.setStatusMessage);
         console.log('User message submitted. Running assistant...');
         
         this.state.runId = await runChatAssistant(this.state.assistantId as string, this.state.threadId as string);
         console.log('Assistant run successfully. Fetching assistant response...');
         
-        const response = await fetchAssistantResponse(this.state.runId as string, this.state.threadId as string);
+        const response = await fetchAssistantResponse(this.state.runId as string, this.state.threadId as string, this.state.setStatusMessage);
         console.log('Assistant response fetched. Adding to chat state...');
         
         const newMessages = [{ role: 'user', content: input }, { role: 'assistant', content: response }];

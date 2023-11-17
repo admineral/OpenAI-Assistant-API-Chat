@@ -1,7 +1,10 @@
 // useChatState.ts
 import { useState, useRef } from 'react';
+import ChatManager from '../services/ChatManager';
 
 export const useChatState = () => {
+  
+  
   const [assistantName, setAssistantName] = useState('');
   const [assistantModel, setAssistantModel] = useState('gpt-3.5-turbo-1106');
   const [assistantDescription, setAssistantDescription] = useState('');
@@ -10,7 +13,6 @@ export const useChatState = () => {
   const [chatStarted, setChatStarted] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [file, setFile] = useState<File>();
-  const [assistantId, setAssistantId] = useState<string | null>(null);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isStartLoading, setStartLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -19,6 +21,9 @@ export const useChatState = () => {
   const counter = useRef(0);
   const inputRef = useRef(null);
   const formRef = useRef(null);
+  const [chatManager, setChatManager] = useState<ChatManager | null>(null);
+  const [assistantId, setAssistantId] = useState<string | null>(process.env.REACT_APP_ASSISTANT_ID || '');
+  const [isMessageLoading, setIsMessageLoading] = useState(false);
 
   return {
     assistantName, setAssistantName,
@@ -38,6 +43,9 @@ export const useChatState = () => {
     inputRef,
     formRef,
     initialThreadMessage, 
-    setInitialThreadMessage
+    setInitialThreadMessage,
+    chatManager, setChatManager,
+    isMessageLoading, setIsMessageLoading,
+    
   };
 };

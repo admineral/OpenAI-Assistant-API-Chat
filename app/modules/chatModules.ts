@@ -21,11 +21,11 @@ interface Message {
 * @param {string} threadId - The ID of the current chat thread.
 * @returns {Promise<void>} - A promise that resolves when the message is successfully added.
 */
-export const submitUserMessage = async (input: string, threadId: string): Promise<void> => {
-  console.log('Submitting user message...');
+export const submitUserMessage = async (input: string, threadId: string, setStatusMessage: (message: string) => void): Promise<void> => {
+  setStatusMessage('Submitting user message...');
   const message = { input, threadId };
   await addMessage(message);
-  console.log('User message submitted successfully.');
+  setStatusMessage('User message submitted successfully.');
 };
 
 
@@ -35,16 +35,16 @@ export const submitUserMessage = async (input: string, threadId: string): Promis
 * @param {string} threadId - The ID of the chat thread.
 * @returns {Promise<string>} - A promise that resolves to the messages from the assistant.
 */
-export const fetchAssistantResponse = async (runId: string, threadId: string): Promise<string> => {
-  console.log('fetchAssistantResponse called with runId:', runId, 'and threadId:', threadId);
+export const fetchAssistantResponse = async (runId: string, threadId: string, setStatusMessage: (message: string) => void): Promise<string> => {
+  setStatusMessage('Fetching assistant response...');
   let status: string;
   do {
       const statusData: StatusData = await checkRunStatus(threadId, runId);
       status = statusData.status;
-      console.log('Waiting...');
+      setStatusMessage('Waiting for assistant response...');
       await new Promise(resolve => setTimeout(resolve, 1000)); // Polling delay
   } while (status !== 'completed');
-  console.log('Assistant response fetched successfully.');
+  setStatusMessage('Assistant response fetched successfully.');
   const response = await listMessages(threadId, runId);
   return response.messages;
 };
