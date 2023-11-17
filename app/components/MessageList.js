@@ -6,7 +6,6 @@ import remarkGfm from "remark-gfm";
 // Message component to display individual messages
 // It receives a message object and a progress value as props
 const Message = ({ message, progress }) => {
-  console.log("Rendering Message component with message:", message);
   return (
     <div
       // Apply different background colors based on the role of the message
@@ -59,7 +58,7 @@ const Message = ({ message, progress }) => {
 // MessageList component to display a list of messages
 // It receives an array of chat messages, a status message, a boolean indicating if a message is being sent, and a progress value as props
 const MessageList = ({ chatMessages, statusMessage, isSending, progress }) => {
-  console.log("Rendering MessageList component with props:", { chatMessages, statusMessage, isSending });
+  
   let messages = [...chatMessages];
   // Find the index of the loading message
   const loadingMessageIndex = messages.findIndex(
