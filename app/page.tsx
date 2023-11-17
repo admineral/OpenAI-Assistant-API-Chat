@@ -82,7 +82,7 @@ export default function Chat() {
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
       <LinkBar />
       {chatHasStarted || assistantId ? (
-        <MessageList chatMessages={chatMessages} statusMessage={statusMessage} isSending={isSending} />
+        <MessageList chatMessages={chatMessages} statusMessage={statusMessage} isSending={isSending} progress={progress} />
       ) : (
         <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, file, handleFileChange, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
       )}

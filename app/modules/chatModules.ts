@@ -56,9 +56,11 @@ export const fetchAssistantResponse = async (runId: string, threadId: string, se
         await new Promise(resolve => setTimeout(resolve, 1000)); // Polling delay
     } while (status !== 'completed');
     setStatusMessage('Assistant response fetched successfully.');
+    setProgress(0); // Reset progress after completion
     const response = await listMessages(threadId, runId);
     return response.messages;
   } catch (error) {
+    setProgress(0); // Reset progress in case of error
     if (error instanceof Error) {
       setStatusMessage(`Error: ${error.message}`);
       throw error; // Re-throw the error after setting the status message
