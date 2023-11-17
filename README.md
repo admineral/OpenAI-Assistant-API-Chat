@@ -17,13 +17,13 @@ In the demo, you can see the AI assistant in action.
 
 - **Personalized AI Assistant**: Customize the assistant's name, model, and description for a unique chat experience.
 - **Interactive Chat Experience**: Engage in dynamic conversations with the AI assistant.
-- **Robust AI Responses**: Leveraging OpenAI's "gpt-4-1106-preview" model for intelligent, context-aware chat responses.
+- **Robust AI Responses**: Leveraging OpenAI's "gpt-4-1106-preview" model (128k context) for intelligent, context-aware chat responses.
 - **File Upload**: Users can upload files for the assistant to analyze.
 - **Code Interpretation**: (Coming Soon) The assistant can execute Pytho code.
 - **Function Calls**: (Coming Soon) Experience interactive functionalities such as API calls based on chat context.
-- **GPT-4 Vision Integration**: (Coming Soon) 
+- **GPT-4 Vision Integration**:  
    - **Image Descriptions**: Send pictures to the AI, and it will describe what it sees, providing insights and understanding of the visual content.
-   - **Optical Character Recognition (OCR)**: The AI can analyze text within images, making it possible to read and respond to textual content in photographs or scanned documents.
+   - **Optical Character Recognition (OCR)**:(Coming Soon) The AI can analyze text within images, making it possible to read and respond to textual content in photographs or scanned documents.
 
 # Image Upload
 
@@ -49,7 +49,7 @@ Please note that this application is currently in the beta phase and is continuo
 ### Installation
 1. **Clone the Repository**:
    ```
-   git clone https://github.com/your-username/openai-assistant-chat.git
+   git clone https://github.com/admineral/OpenAI-Assistant-API-Chat.git
    ```
 2. **Install Dependencies**:
    Navigate to the project directory and run:
@@ -78,115 +78,178 @@ Your contributions make this project thrive. Whether it's reporting bugs, sugges
 We look forward to growing this project with the community's support and creativity!
 
 
-# Code Explanation for `app/page.tsx` 
 
-## Overview
-The file `app/page.tsx` is a core part of the application, primarily written in TypeScript and React. It includes the main `Chat` component and several functions and hooks for handling the chat interface and interactions with an AI assistant.
+## Application Architecture Overview
 
-### `Chat` Component
-```tsx
-export default function Chat() {
-  // ... Component logic
-}
-```
-- **Purpose**: The `Chat` component is the main component of the application. It orchestrates the chat interface, handling user interactions and displaying chat messages.
-- **Key Features**:
-  - Manages chat state using custom hooks.
-  - Handles file inputs for initiating the assistant.
-  - Triggers assistant-related functions like `startChatAssistant` and `handleFormSubmit`.
+### ChatManager (`ChatManager.ts`)
+- **Role**: Central component for managing chat state and operations.
+- **Functions**:
+  - `startAssistant`: Initializes the chat assistant, manages file uploads, and handles thread creation.
+  - `sendMessage`: Sends user messages to the assistant and updates the chat.
+  - `getChatState`: Retrieves the current state of the chat, including messages and assistant status.
 
-### `startChatAssistant` Function
-```tsx
-async function startChatAssistant() {
-  // ... Function logic
-}
-```
-- **Purpose**: This function initiates the chat assistant. It involves multiple steps like uploading a file, creating an assistant, starting a chat thread, and managing the assistant's run status.
-- **Process Flow**:
-  1. **Validation**: Checks if necessary fields are filled.
-  2. **Status Update**: Sets various status messages throughout the process.
-  3. **File Handling**: Handles file uploads and processes images for description.
-  4. **Assistant and Thread Creation**: Creates an assistant and a chat thread.
-  5. **Running the Assistant**: Starts the assistant and monitors its status.
-  6. **Message Retrieval**: Fetches messages from the thread to display in the chat.
-
-### `handleFormSubmit` Function
-```tsx
-const handleFormSubmit = async (e: any) => {
-  // ... Function logic
-}
-```
-- **Purpose**: Manages the submission of the chat form. It sends user messages to the assistant and updates the chat with the assistant's responses.
-- **Process Flow**:
-  1. **Message Addition**: Adds the user's message to chat.
-  2. **API Interactions**: Communicates with various API endpoints for sending and receiving messages.
-  3. **Chat Update**: Updates the chat interface with new messages.
-
-### Custom Hook: `useChatState`
-```tsx
-export const useChatState = () => {
-  // ... Hook logic
-}
-```
-- **Purpose**: Manages the chat's state, including variables like the assistant's details, chat messages, and UI-related states.
-- **Key States Managed**: Includes states for assistant details (name, model, description), chat messages, file data, loading and disabled states, and more.
-
-### Key Components:
-- **`WelcomeForm`**: A form component for initializing the assistant.
-- **`InputForm`**: A form for the user to input their messages.
-- **`MessageList`**: Displays the list of chat messages.
-
-### File Structure and Interaction
-- **Services and API Calls**: `app/services/api.js` includes API functions like `uploadImageAndGetDescription`, `uploadFile`, and `createAssistant`.
-- **API Routes**: Includes routes like `app/api/upload/route.ts` and `app/api/listMessages/route.ts` for handling file uploads and message listing.
-- **Components Interaction**: The `Chat` component uses `WelcomeForm`, `InputForm`, and `MessageList` to build the user interface.
-
-### Conclusion
-This TypeScript and React code in `app/page.tsx` plays a crucial role in the application by managing the main chat interface, interacting with the backend for data processing, and providing a seamless user experience.
-
-
-
-# Comprehensive Code Explanation 
-
-## Overview
-This application features a chat interface that interacts with an AI assistant. It includes various components, functions, and services that handle the user interface, data processing, and API interactions.
-
-### `app/page.tsx`: Main Chat Component
-- **Functionality**: Serves as the primary interface for the chat application.
-- **Key Elements**:
-  - **`Chat` Component**: Orchestrates the entire chat interface.
-  - **`startChatAssistant` Function**: Initializes the chat assistant, managing file uploads and assistant interactions.
-  - **`handleFormSubmit` Function**: Handles sending user messages and displaying assistant responses.
-  - **Custom Hook (`useChatState`)**: Manages state variables for the chat, including assistant details and chat messages.
-  - **Sub-Components**: Includes `WelcomeForm` for initial setup, `InputForm` for message input, and `MessageList` for displaying chat messages.
-
-### `app/services/api.js`: API Service Functions
-- **Functionality**: Contains functions for various API interactions.
+### API Layer (`api.js`)
+- **Purpose**: Acts as an intermediary between the front-end and various API routes.
 - **Key Functions**:
-  - **`uploadImageAndGetDescription`**: Uploads an image and retrieves a description.
-  - **`uploadFile`**: Handles file uploads.
-  - **`createAssistant`**: Creates an AI assistant instance.
-  - Other functions for managing chat threads and assistant interactions.
+  - `uploadImageAndGetDescription`: Uploads images and gets descriptions using the GPT-4 Vision API.
+  - `createAssistant`, `createThread`, `runAssistant`: Handles assistant creation, thread management, and assistant operations.
 
-### API Routes
-- **`app/api/upload/route.ts`**: Manages the uploading of files necessary for initiating chat sessions.
-- **`app/api/listMessages/route.ts`**: Retrieves messages from a specific chat thread.
+### Assistant Modules (`assistantModules.ts`)
+- **Role**: Manages tasks related to the chat assistant, such as file preparation and assistant initialization.
+- **Key Functions**:
+  - `prepareUploadFile`: Prepares and uploads files for the chat assistant.
+  - `initializeAssistant`: Initializes a chat assistant with specific details.
+  - `createChatThread`: Creates a chat thread with an initial message.
 
-### Custom Hooks
-- **`useChatState.ts`**: Manages the chat state, including user inputs, chat messages, and UI states.
+### Chat Modules (`chatModules.ts`)
+- **Purpose**: Manages chat-related functionalities.
+- **Key Functions**:
+  - `submitUserMessage`: Submits user messages to the chat.
+  - `fetchAssistantResponse`: Fetches the latest messages from the assistant.
+  - `updateChatState`: Updates the chat state with new messages.
+
+
+## Detailed Code Explanation
+
+### ChatManager Implementation (`ChatManager.ts`)
+- **Singleton Pattern**: Ensures a single instance of `ChatManager` manages the chat state and operations.
+- **State Management**: Handles chat state, including messages, thread IDs, assistant status, and loading states.
+- **Error Handling**: Robust error handling during chat operations.
+- **API Integration**: Integrates with API layer for message sending/receiving and chat thread management.
+
+### API Layer (`api.js`)
+- **Central API Management**: Simplifies front-end interactions with a clean API interface.
+- **Error Handling**: Ensures smooth application operation with error handling in API requests.
+
+### Front-End Interaction
+- **React Hooks**: Utilizes hooks in `useChatState.ts` for state management.
+- **User Interface**: `InputForm` and `MessageList` interact with `ChatManager` for displaying messages and handling user inputs.
+
+
+
+
+
+
+
+
+### Main Components and Flow
+- **ChatManager (`ChatManager.ts`)**: Central component managing the chat state and operations.
+- **API Layer (`api.js`)**: Intermediary for API interactions.
+- **Assistant Modules (`assistantModules.ts`)**: Handles tasks related to the chat assistant.
+- **Chat Modules (`chatModules.ts`)**: Manages chat functionalities.
+
+## Detailed Breakdown
+
+### `ChatManager.ts`
+This is the core class managing the chat's state and operations.
+
+```typescript
+class ChatManager {
+  private state: ChatState;
+  private static instance: ChatManager | null = null;
+
+  // Singleton pattern to ensure a single ChatManager instance
+  private constructor(setChatMessages: (messages: any[]) => void, setStatusMessage: (message: string) => void) {
+    this.state = {
+      /* State initialization */
+    };
+    console.log('ChatManager initialized');
+  }
+
+  // Method to get the current instance of ChatManager
+  public static getInstance(setChatMessages: (messages: any[]) => void, setStatusMessage: (message: string) => void): ChatManager {
+    if (this.instance === null) {
+      this.instance = new ChatManager(setChatMessages, setStatusMessage);
+    }
+    return this.instance;
+  }
+
+  // Method to start the assistant
+  async startAssistant(assistantDetails: any, file: File | null, initialMessage: string): Promise<void> {
+    // ... Function logic including API calls to initialize assistant and create chat thread
+  }
+
+  // Method to send a message
+  async sendMessage(input: string): Promise<void> {
+    // ... Function logic to handle message sending
+  }
+
+  // Method to get the current chat state
+  getChatState(): ChatState {
+    console.log('Getting chat state');
+    return this.state;
+  }
+}
+```
+- **Key Features**:
+  - Singleton pattern ensures only one instance of `ChatManager` is created.
+  - Manages the chat's state, including messages, assistant's ID, thread ID, and loading states.
+  - `startAssistant`: Initiates the assistant and sets up the chat thread.
+  - `sendMessage`: Handles sending messages to the assistant.
+  - `getChatState`: Retrieves the current state of the chat.
+
+### `api.js`
+This module contains functions for various API interactions required by the chat application.
+
+```javascript
+// Example of an API function
+export const uploadImageAndGetDescription = async (base64Image) => {
+  // Code to upload an image and get a description using the OpenAI API
+};
+
+export const createAssistant = async (assistantDetails) => {
+  // Code to create an assistant
+};
+
+// Other API functions like 'createThread', 'runAssistant', etc.
+```
+- **Purpose**: Provides a centralized and clean interface for API interactions.
+- **Key Functions**:
+  - `uploadImageAndGetDescription`: Uploads a base64 encoded image and gets a description.
+  - `createAssistant`: Creates a new assistant instance.
+  - Other functions for managing threads, running assistants, etc.
+
+### `assistantModules.ts`
+Contains functions related to preparing and managing the chat assistant.
+
+```typescript
+export const prepareUploadFile = async (file: File, setStatusMessage: (message: string) => void): Promise<string> => {
+  // Logic to prepare and upload a file for the chat assistant
+};
+
+export const initializeAssistant = async (assistantDetails, fileId): Promise<string> => {
+  // Logic to initialize an assistant with given details
+};
+
+export const createChatThread = async (inputMessage: string): Promise<string> => {
+  // Logic to create a chat thread
+};
+```
+- **Purpose**: Handles assistant-related tasks such as file preparation and assistant initialization.
+
+### `chatModules.ts`
+Manages chat-related functionalities, primarily dealing with messages.
+
+```typescript
+export const submitUserMessage = async (input: string, threadId: string): Promise<void> => {
+  // Logic to submit a user's message to the chat
+};
+
+export const fetchAssistantResponse = async (runId: string, threadId: string): Promise<string> => {
+  // Logic to fetch the latest messages from the assistant
+};
+
+export const updateChatState = (prevMessages: Message[], newMessages: Message[], setChatMessages: (messages: any[]) => void): Promise<void> => {
+  // Logic to update the chat state with new messages
+};
+```
+- **Purpose**: Manages sending user messages, fetching assistant responses, and updating the chat state.
 
 ### React Components
-- **`MessageList.js`**: Displays chat messages in a user-friendly format.
-- **`WelcomeForm.js`**: Initial setup form for the assistant.
-- **`InputForm.js`**: Form for user message input.
+- **`WelcomeForm`**, **`InputForm`**, and **`MessageList`** are React components that build the user interface of the chat application.
 
-### Functional Flow
-1. **Initialization (WelcomeForm)**: User inputs details and initiates the assistant.
-2. **Assistant Setup (`startChatAssistant`)**: The assistant is set up, including file uploads and thread creation.
-3. **Message Handling (`handleFormSubmit`)**: User messages are sent, and responses are fetched and displayed.
-4. **State Management (`useChatState`)**: Maintains the overall state of the chat, including messages and statuses.
-5. **API Interactions (`api.js` Services)**: Communicate with backend services for various functionalities like uploading files, creating assistants, and fetching messages.
-6. **User Interface**: The `Chat` component integrates various sub-components and custom hooks to provide an interactive chat interface.
+ They use hooks and states to manage user interactions and display chat messages.
 
-### Conclusion
-Overall, this application exemplifies a well-structured React and TypeScript project, incorporating efficient state management, API interactions, and a user-centric interface. Each part of the codebase contributes to a seamless chat experience with an AI assistant, showcasing modern web development practices.
+### API Routes (`/api/*.ts`)
+These files define various API routes for handling tasks like creating assistants, listing messages, checking run status, etc. They interact with the OpenAI API and provide endpoints for the frontend to call.
+
