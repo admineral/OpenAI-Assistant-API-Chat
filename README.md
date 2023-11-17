@@ -4,12 +4,20 @@
 
 Welcome to the OpenAI Assistant API Chat repository! This innovative chat application allows users to interact with an AI assistant powered by OpenAI's latest "gpt-4-1106-preview" model. It's an exciting space where technology meets conversation, offering a unique experience of AI interaction.
 
+## Newest Features
+
+- **Progress Bar During Chat**: The application now includes a progress bar that provides visual feedback during the chat. This helps users understand the status of the chat and enhances the overall user experience.
+
+- **Hard Coded Assistant ID**: You can now set a default assistant ID in the`.env` check out the  `.env.example` file. This allows you to specify a default assistant for the chat. If this value is set, the application will use this assistant for the chat. If this value is not set, the application will prompt the user to enter the assistant details. Here's how you can set it:
 
 
-# Demo
+
+# [Demo](https://open-ai-assistant-api-chat.vercel.app)
 <img src="Public/File_upload.gif" alt="Agent42" width="600px">
-In the demo, you can see the AI assistant in action.
-[LIVE DEMO](https://open-ai-assistant-api-chat.vercel.app)
+
+Please use GPT 3.5 for testing lol
+
+[![Live Demo](https://img.shields.io/badge/Live-Demo-green.svg)](https://open-ai-assistant-api-chat.vercel.app)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fadmineral%2FOpenAI-Assistant-API-Chat&env=OPENAI_API_KEY&envDescription=OpenAI%20API%20Key&envLink=https%3A%2F%2Fplatform.openai.com%2Faccount%2Fapi-keys&project-name=openai-assistant-api-chat&repository-name=OpenAI-Assistant-API-Chat)
 
