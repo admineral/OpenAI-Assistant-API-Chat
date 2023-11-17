@@ -34,31 +34,31 @@ interface ThreadDataResponse {
 * @param {File} file - The file to be uploaded.
 * @returns {Promise<string>} - The ID of the uploaded file.
 */
-export const prepareUploadFile = async (file: File): Promise<string> => {
-  console.log('Preparing file for upload...');
+export const prepareUploadFile = async (file: File, setStatusMessage: (message: string) => void): Promise<string> => {
+  setStatusMessage('Preparing file for upload...');
 
   // If the file is an image, get a description from GPT-4 Vision API
   if (file.type.startsWith('image/')) {
-    console.log('File is an image, getting description...');
+    setStatusMessage('Converting image to base64...');
     const base64Image = await convertFileToBase64(file);
+
+    setStatusMessage('Getting image description...');
     const descriptionResponse = await uploadImageAndGetDescription(base64Image);
-    console.log('Image description:', descriptionResponse.analysis);
 
-    // Create a Blob from the description
+    setStatusMessage('Creating description file...');
     const descriptionBlob = new Blob([descriptionResponse.analysis], { type: 'text/plain' });
-
-    // Create a File object from the Blob
     const descriptionFile = new File([descriptionBlob], 'description.txt');
 
-    // Upload the description file
+    setStatusMessage('Uploading description file...');
     const uploadedFile: UploadedFileResponse = await uploadFile(descriptionFile);
-    console.log('Description file uploaded successfully. File ID:', uploadedFile.fileId);
+    setStatusMessage('Description file uploaded successfully. File ID: ' + uploadedFile.fileId);
     return uploadedFile.fileId;
   }
 
   // If the file is not an image, upload it as a normal file
+  setStatusMessage('Uploading file...');
   const uploadedFile: UploadedFileResponse = await uploadFile(file);
-  console.log('File uploaded successfully. File ID:', uploadedFile.fileId);
+  setStatusMessage('File uploaded successfully. File ID: ' + uploadedFile.fileId);
   return uploadedFile.fileId;
 };
 
