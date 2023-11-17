@@ -1,5 +1,4 @@
-// ChatManager.ts
-
+// Importing necessary modules
 import {
   prepareUploadFile,
   initializeAssistant,
@@ -17,17 +16,18 @@ import {
  * Interface for the state of the chat
  */
 interface ChatState {
-  assistantId: string | null;
-  threadId: string | null;
-  messages: any[]; // Adjust the type as per your message structure
-  isLoading: boolean;
-  error: Error | null;
-  runId: string | null; 
-  assistantResponseReceived: boolean;
-  isSending: boolean;
-  setChatMessages: (messages: any[]) => void;
-  setStatusMessage: (message: string) => void;
-  statusMessage:string;
+  assistantId: string | null; // ID of the assistant
+  threadId: string | null; // ID of the chat thread
+  messages: any[]; // Array of messages
+  isLoading: boolean; // Loading state
+  error: Error | null; // Any error that occurred
+  runId: string | null; // ID of the assistant run
+  assistantResponseReceived: boolean; // Whether the assistant's response has been received
+  isSending: boolean; // Whether a message is being sent
+  setChatMessages: (messages: any[]) => void; // Function to set the chat messages
+  setStatusMessage: (message: string) => void; // Function to set the status message
+  statusMessage:string; // Status message
+  setProgress: (progress: number) => void; // Function to set the progress
 }
 
 /**
@@ -35,10 +35,12 @@ interface ChatState {
  */
 class ChatManager {
 
-  private state: ChatState;
-  private static instance: ChatManager | null = null;
+  private state: ChatState; // State of the chat
+  private static instance: ChatManager | null = null; // Singleton instance of the ChatManager
 
-  private constructor(setChatMessages: (messages: any[]) => void, setStatusMessage: (message: string) => void) {
+  // Private constructor for singleton pattern
+  private constructor(setChatMessages: (messages: any[]) => void, setStatusMessage: (message: string) => void, setProgress: (progress: number) => void) {
+    // Initialize the state
     this.state = {
       assistantId: null,
       threadId: null,
@@ -51,22 +53,25 @@ class ChatManager {
       setChatMessages: setChatMessages,
       setStatusMessage: setStatusMessage,
       statusMessage: '',
+      setProgress: setProgress
     };
     console.log('ChatManager initialized');
   }
   
-  // Add the getCurrentMessages method here
+  // Method to get the current messages
   public getCurrentMessages(): any[] {
     return this.state.messages;
   }
 
-  public static getInstance(setChatMessages: (messages: any[]) => void, setStatusMessage: (message: string) => void): ChatManager {
+  // Method to get the singleton instance of the ChatManager
+  public static getInstance(setChatMessages: (messages: any[]) => void, setStatusMessage: (message: string) => void, setProgress: (progress: number) => void): ChatManager {
     if (this.instance === null) {
-      this.instance = new ChatManager(setChatMessages, setStatusMessage);
+      this.instance = new ChatManager(setChatMessages, setStatusMessage, setProgress);
     }
     return this.instance;
   }
 
+  // Method to start the assistant
   async startAssistant(assistantDetails: any, file: File | null, initialMessage: string): Promise<void> {
     console.log('Starting assistant...');
   
@@ -74,6 +79,7 @@ class ChatManager {
     this.state.isLoading = true;
   
     try {
+      // Upload the file
       this.state.setStatusMessage('Starting upload...');
       const fileId = file ? await prepareUploadFile(file, this.state.setStatusMessage) : null;
       if (fileId === null) {
@@ -81,6 +87,7 @@ class ChatManager {
       } 
       this.state.setStatusMessage('Upload complete..');
 
+      // Initialize the assistant
       this.state.setStatusMessage('Create Assistant...');
       const assistantId = await initializeAssistant(assistantDetails, fileId);
       if (assistantId === null) {
@@ -88,6 +95,7 @@ class ChatManager {
       }
       this.state.setStatusMessage('Assistant created...');
   
+      // Create the chat thread
       this.state.setStatusMessage('Creating thread...');
       this.state.assistantId = assistantId;
       const threadId = await createChatThread(initialMessage);
@@ -96,6 +104,7 @@ class ChatManager {
       }
       this.state.setStatusMessage('Received thread_ID...');
   
+      // Run the assistant
       this.state.setStatusMessage('Running assistant...');
       this.state.threadId = threadId;
       const runId = await runChatAssistant(this.state.assistantId, this.state.threadId);
@@ -103,22 +112,23 @@ class ChatManager {
         throw new Error('RunId is null');
       }
       
-  
-  
+      // Store the run ID
       this.state.runId = runId; 
       this.state.setStatusMessage('Received Run_ID..');
   
+      // Fetch the assistant's response
       if (this.state.runId && this.state.threadId) {
         const runId = this.state.runId as string;
         const threadId = this.state.threadId as string;
         this.state.setStatusMessage('checking status...');
-        const assistantResponse = await fetchAssistantResponse(runId, threadId, this.state.setStatusMessage);
+        const response = await fetchAssistantResponse(runId, threadId, this.state.setStatusMessage, this.state.setProgress);
         
         this.state.setStatusMessage('Run complete...');
         this.state.assistantResponseReceived = true;
         this.state.setStatusMessage('Received messages...');
         
-        const newMessage = { role: 'assistant', content: assistantResponse };
+        // Add the assistant's response to the messages
+        const newMessage = { role: 'assistant', content: response };
         this.state.setStatusMessage('Adding messages to chat...');
         
         this.state.messages = [...this.state.messages, newMessage];
@@ -129,17 +139,21 @@ class ChatManager {
       }
   
     } catch (error) {
+      // Handle any errors
       this.state.error = error as Error;
       this.state.setStatusMessage(`Error: ${this.state.error.message}`);
       console.error('Error in starting assistant:', error);
     } finally {
+      // Finalize the operation
       this.state.setStatusMessage('Done');
       this.state.isLoading = false;
     }
   }
 
+  // Method to start the assistant with a given ID
   async startAssistantWithId(assistantId: string, initialMessage: string): Promise<void> {
     try {
+      // Create the chat thread
       this.state.setStatusMessage('Creating thread...');
       this.state.assistantId = assistantId;
       const threadId = await createChatThread(initialMessage);
@@ -148,6 +162,7 @@ class ChatManager {
       }
       this.state.setStatusMessage('Received thread_ID...');
   
+      // Run the assistant
       this.state.setStatusMessage('Running assistant...');
       this.state.threadId = threadId;
       const runId = await runChatAssistant(this.state.assistantId, this.state.threadId);
@@ -158,16 +173,18 @@ class ChatManager {
       this.state.runId = runId; 
       this.state.setStatusMessage('Received Run_ID..');
   
+      // Fetch the assistant's response
       if (this.state.runId && this.state.threadId) {
         const runId = this.state.runId as string;
         const threadId = this.state.threadId as string;
         this.state.setStatusMessage('checking status...');
-        const assistantResponse = await fetchAssistantResponse(runId, threadId, this.state.setStatusMessage);
+        const assistantResponse = await fetchAssistantResponse(runId, threadId, this.state.setStatusMessage, this.state.setProgress);
         
         this.state.setStatusMessage('Run complete...');
         this.state.assistantResponseReceived = true;
         this.state.setStatusMessage('Received messages...');
         
+        // Add the assistant's response to the messages
         const newMessage = { role: 'assistant', content: assistantResponse };
         this.state.setStatusMessage('Adding messages to chat...');
         
@@ -178,16 +195,18 @@ class ChatManager {
         console.error('RunId or ThreadId is null. Current state:', this.state);
       }
     } catch (error) {
+      // Handle any errors
       this.state.setStatusMessage('Error!');
       this.state.error = error as Error;
       console.error('Error in starting assistant:', error);
     } finally {
+      // Finalize the operation
       this.state.setStatusMessage('Done');
       this.state.isLoading = false;
     }
   }
 
-
+  // Method to send a message
   async sendMessage(input: string): Promise<void> {
     this.state.isSending = true; 
     const newUserMessage = { role: 'user', content: input };
@@ -197,36 +216,37 @@ class ChatManager {
     try {
       if (this.state.threadId && this.state.assistantId) { 
         
+        // Submit the user's message
         await submitUserMessage(input, this.state.threadId, this.state.setStatusMessage);
         console.log('User message submitted. Running assistant...');
         
+        // Run the assistant
         this.state.runId = await runChatAssistant(this.state.assistantId as string, this.state.threadId as string);
         console.log('Assistant run successfully. Fetching assistant response...');
         
-        const response = await fetchAssistantResponse(this.state.runId as string, this.state.threadId as string, this.state.setStatusMessage);
+        // Fetch the assistant's response
+        const response = await fetchAssistantResponse(this.state.runId as string, this.state.threadId as string, this.state.setStatusMessage, this.state.setProgress);
         console.log('Assistant response fetched. Adding to chat state...');
         
-        const newMessages = [{ role: 'user', content: input }, { role: 'assistant', content: response }];
-
+        // Add the assistant's response to the messages
         const newAssistantMessage = { role: 'assistant', content: response };
         this.state.messages = [...this.state.messages, newAssistantMessage];
         this.state.setChatMessages(this.state.messages);
         
-        //----BETA----BUG----//
-        //await updateChatState(this.state.messages, newMessages, this.state.setChatMessages);
-        //----BETA----BUG----//
       } else {
         console.error('ThreadId or AssistantId is null');
       }
     } catch (error) {
+      // Handle any errors
       this.state.error = error as Error;
       console.error('Error in sending message:', error);
     } finally {
+      // Finalize the operation
       this.state.isSending = false; 
     }
   }
 
-
+  // Method to get the current chat state
   getChatState(): ChatState {
     console.log('Getting chat state');
     return this.state;

@@ -25,12 +25,13 @@ export default function Chat() {
     chatStarted: chatHasStarted,
     chatManager, setChatManager,
     assistantId,
-    isMessageLoading, setIsMessageLoading,  
+    isMessageLoading, setIsMessageLoading,
+    progress, setProgress, 
   } = useChatState();
 
 
 
-  useChatManager(setChatMessages, setStatusMessage, setChatManager, setIsMessageLoading);
+  useChatManager(setChatMessages, setStatusMessage, setChatManager, setIsMessageLoading, setProgress);
   useStartAssistant(assistantId, chatManager, initialThreadMessage);
 
 
@@ -81,7 +82,7 @@ export default function Chat() {
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
       <LinkBar />
       {chatHasStarted || assistantId ? (
-        <MessageList chatMessages={chatMessages} statusMessage={statusMessage} />
+        <MessageList chatMessages={chatMessages} statusMessage={statusMessage} isSending={isSending} />
       ) : (
         <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, file, handleFileChange, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
       )}

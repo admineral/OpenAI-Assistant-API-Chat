@@ -35,20 +35,37 @@ export const submitUserMessage = async (input: string, threadId: string, setStat
 * @param {string} threadId - The ID of the chat thread.
 * @returns {Promise<string>} - A promise that resolves to the messages from the assistant.
 */
-export const fetchAssistantResponse = async (runId: string, threadId: string, setStatusMessage: (message: string) => void): Promise<string> => {
-  setStatusMessage('Fetching assistant response...');
-  let status: string;
-  do {
-      const statusData: StatusData = await checkRunStatus(threadId, runId);
-      status = statusData.status;
-      setStatusMessage('Waiting for assistant response...');
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Polling delay
-  } while (status !== 'completed');
-  setStatusMessage('Assistant response fetched successfully.');
-  const response = await listMessages(threadId, runId);
-  return response.messages;
+export const fetchAssistantResponse = async (runId: string, threadId: string, setStatusMessage: (message: string) => void, setProgress: (progress: number) => void): Promise<string> => {
+  try {
+    const startTime = Date.now(); // Get the current time at the start
+    setStatusMessage('Fetching assistant response...');
+    let status: string;
+    let fetchCount = 0; // Number of fetches so far
+    const maxFetches = 10; // Maximum number of fetches
+    do {
+        const statusData: StatusData = await checkRunStatus(threadId, runId);
+        status = statusData.status;
+        fetchCount++; // Increment the fetch count
+        const progress = (fetchCount / maxFetches) * 100; // Calculate progress as a percentage
+        setProgress(progress); // Update the progress bar
+        if (status === 'cancelled' || status === 'cancelling' || status === 'failed' || status === 'expired') {
+          throw new Error(status);
+        }
+        const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2); // Calculate elapsed time in seconds
+        setStatusMessage(`Waiting for assistant response... Current status: ${status}. Time elapsed: ${elapsedTime} seconds.`);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Polling delay
+    } while (status !== 'completed');
+    setStatusMessage('Assistant response fetched successfully.');
+    const response = await listMessages(threadId, runId);
+    return response.messages;
+  } catch (error) {
+    if (error instanceof Error) {
+      setStatusMessage(`Error: ${error.message}`);
+      throw error; // Re-throw the error after setting the status message
+    }
+    throw error; // Re-throw the error if it's not an instance of Error
+  }
 };
-
 
 
 /**

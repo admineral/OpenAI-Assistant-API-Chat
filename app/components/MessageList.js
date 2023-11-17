@@ -19,28 +19,62 @@ const Message = ({ message }) => (
       >
         {message.role === "user" ? <User width={20} /> : <Bot width={20} />}
       </div>
-      <ReactMarkdown
-        className="prose mt-1 w-full break-words prose-p:leading-relaxed"
-        remarkPlugins={[remarkGfm]}
-        components={{
-          a: (props) => (
-            <a {...props} target="_blank" rel="noopener noreferrer" />
-          ),
-        }}
-      >
-        {message.content}
-      </ReactMarkdown>
+      {message.role === "assistant" && message.isLoading ? (
+        <>
+          <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-full bg-green-500 animate-pulse"></div>
+          </div>
+          <div className="w-full flex items-center justify-center text-xs text-green-500">
+            {message.statusMessage}
+          </div>
+        </>
+      ) : (
+        <ReactMarkdown
+          className="prose mt-1 w-full break-words prose-p:leading-relaxed"
+          remarkPlugins={[remarkGfm]}
+          components={{
+            a: (props) => (
+              <a {...props} target="_blank" rel="noopener noreferrer" />
+            ),
+          }}
+        >
+          {message.content}
+        </ReactMarkdown>
+      )}
     </div>
   </div>
 );
 
-const MessageList = ({ chatMessages, statusMessage }) => (
-  <>
-    <div>{statusMessage}</div>
-    {chatMessages.map((message, i) => (
-      <Message key={i} message={message} />
-    ))}
-  </>
-);
+const MessageList = ({ chatMessages, statusMessage, isSending }) => {
+  let messages = [...chatMessages];
+  const loadingMessageIndex = messages.findIndex(
+    (message) => message.role === "assistant" && message.isLoading
+  );
+
+  if (isSending) {
+    if (loadingMessageIndex !== -1) {
+      // If a loading message already exists, update its status message
+      messages[loadingMessageIndex].statusMessage = statusMessage;
+    } else {
+      // If no loading message exists, add a new one
+      messages.push({
+        role: "assistant",
+        isLoading: true,
+        statusMessage,
+      });
+    }
+  } else if (loadingMessageIndex !== -1) {
+    // If not sending and a loading message exists, remove it
+    messages.splice(loadingMessageIndex, 1);
+  }
+
+  return (
+    <>
+      {messages.map((message, i) => (
+        <Message key={i} message={message} />
+      ))}
+    </>
+  );
+};
 
 export default MessageList;
