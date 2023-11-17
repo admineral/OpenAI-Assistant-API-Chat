@@ -22,9 +22,13 @@ Welcome to the OpenAI Assistant API Chat repository! This innovative chat applic
 
 
 
-Please use GPT 3.5 for testing lol
+## Deployment
 
+This application is ready to be deployed with Vercel, a cloud platform for static sites and Serverless Functions. Vercel provides an easy way to deploy your applications directly from your repository.
 
+To deploy this application with Vercel, click on the "Deploy with Vercel" button below. This will take you to the Vercel platform where you'll be guided through the deployment process.
+
+Please note that you'll need to provide your OpenAI API key during the deployment process. This key is used to authenticate your application's requests to the OpenAI API.
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fadmineral%2FOpenAI-Assistant-API-Chat&env=OPENAI_API_KEY&envDescription=OpenAI%20API%20Key&envLink=https%3A%2F%2Fplatform.openai.com%2Faccount%2Fapi-keys&project-name=openai-assistant-api-chat&repository-name=OpenAI-Assistant-API-Chat)
 
