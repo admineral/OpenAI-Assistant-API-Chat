@@ -35,7 +35,7 @@ export const submitUserMessage = async (input: string, threadId: string, setStat
 * @param {string} threadId - The ID of the chat thread.
 * @returns {Promise<string>} - A promise that resolves to the messages from the assistant.
 */
-export const fetchAssistantResponse = async (runId: string, threadId: string, setStatusMessage: (message: string) => void, setProgress: (progress: number) => void): Promise<string> => {
+export const fetchAssistantResponse = async (runId: string, threadId: string, setStatusMessage: (message: string) => void, setProgress: (progress: number) => void, initialProgress: number): Promise<string> => {
   try {
     const startTime = Date.now(); // Get the current time at the start
     setStatusMessage('Fetching assistant response...');
@@ -46,7 +46,7 @@ export const fetchAssistantResponse = async (runId: string, threadId: string, se
         const statusData: StatusData = await checkRunStatus(threadId, runId);
         status = statusData.status;
         fetchCount++; // Increment the fetch count
-        const progress = (fetchCount / maxFetches) * 100; // Calculate progress as a percentage
+        const progress = initialProgress + ((fetchCount / maxFetches) * (90 - initialProgress)); // Calculate progress as a percentage
         setProgress(progress); // Update the progress bar
         if (status === 'cancelled' || status === 'cancelling' || status === 'failed' || status === 'expired') {
           throw new Error(status);
@@ -56,7 +56,7 @@ export const fetchAssistantResponse = async (runId: string, threadId: string, se
         await new Promise(resolve => setTimeout(resolve, 1000)); // Polling delay
     } while (status !== 'completed');
     setStatusMessage('Assistant response fetched successfully.');
-    setProgress(0); // Reset progress after completion
+    setProgress(100); // Set progress to 100% after completion
     const response = await listMessages(threadId, runId);
     return response.messages;
   } catch (error) {
