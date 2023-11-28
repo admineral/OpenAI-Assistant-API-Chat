@@ -58,6 +58,7 @@ export const prepareUploadFile = async (file: File, setStatusMessage: (message: 
   // If the file is not an image, upload it as a normal file
   setStatusMessage('Uploading file...');
   const uploadedFile: UploadedFileResponse = await uploadFile(file);
+  console.log('Uploaded file response:', uploadedFile); // Add this line
   setStatusMessage('File uploaded successfully. File ID: ' + uploadedFile.fileId);
   return uploadedFile.fileId;
 };
@@ -70,19 +71,23 @@ export const prepareUploadFile = async (file: File, setStatusMessage: (message: 
 * @param {string} fileId - The ID of the uploaded file associated with the assistant.
 * @returns {Promise<string>} - The ID of the created assistant.
 */
-export const initializeAssistant = async (assistantDetails: AssistantDetails, fileId: string): Promise<string> => {
+export const initializeAssistant = async (assistantDetails: AssistantDetails, fileIds: string[]): Promise<string> => {
   console.log('Initializing assistant...');
+  
+  // Log the assistantDetails and fileIds
+  console.log('(initialize) -> Assistant Details:', assistantDetails);
+  console.log('(initialize) -> File IDs:', fileIds);
+
   const assistantData: AssistantDataResponse = await createAssistant(
       assistantDetails.assistantName,
       assistantDetails.assistantModel,
       assistantDetails.assistantDescription,
-      fileId
+      fileIds
   );
+
   console.log('Assistant created successfully. Assistant ID:', assistantData.assistantId);
   return assistantData.assistantId; 
 };
-
-
 
 /**
 * Creates a chat thread with the initial message.

@@ -30,16 +30,25 @@ export const uploadImageAndGetDescription = async (base64Image) => {
       throw new Error('File upload failed');
     }
     console.log('File uploaded successfully');
-    return await response.json();
+    const jsonResponse = await response.json();
+    console.log('Server response:', jsonResponse); // Add this line
+    return { fileId: jsonResponse.fileId }; // return only the fileId
   };
   
   // Creates an assistant
-  export const createAssistant = async (assistantName, assistantModel, assistantDescription, fileId) => {
+  export const createAssistant = async (assistantName, assistantModel, assistantDescription, fileIds) => {
     console.log('Creating assistant...');
+    
+    // Log the assistant details and file IDs
+    console.log('(create)-> Assistant Name:', assistantName);
+    console.log('(create)-> Assistant Model:', assistantModel);
+    console.log('(create)-> Assistant Description:', assistantDescription);
+    console.log('(create)-> File IDs:', fileIds);
+
     const response = await fetch('/api/createAssistant', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ assistantName, assistantModel, assistantDescription, fileId }),
+      body: JSON.stringify({ assistantName, assistantModel, assistantDescription, fileIds: fileIds }),
     });
     if (!response.ok) {
       console.error('Failed to create assistant');

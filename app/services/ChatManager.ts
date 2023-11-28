@@ -74,25 +74,26 @@ class ChatManager {
   }
 
   // Method to start the assistant
-  async startAssistant(assistantDetails: any, file: File | null, initialMessage: string): Promise<void> {
+  async startAssistant(assistantDetails: any, files: File[] | null, initialMessage: string): Promise<void> {
     console.log('Starting assistant...');
     
-  
     this.state.setStatusMessage('Initializing chat assistant...');
     this.state.isLoading = true;
-  
+    
     try {
-      // Upload the file
+      // Upload the files
       this.state.setStatusMessage('Starting upload...');
-      const fileId = file ? await prepareUploadFile(file, this.state.setStatusMessage) : null;
-      if (fileId === null) {
-        throw new Error('FileId is null');
-      } 
+      console.log('Files:', files);
+      const fileIds = files ? await Promise.all(files.map(file => prepareUploadFile(file, this.state.setStatusMessage))) : [];
+      console.log('File IDs:', fileIds);
+      if (fileIds.map(String).includes('null')) {
+        throw new Error('One or more file IDs are null');
+      }
       this.state.setStatusMessage('Upload complete..');
-
+    
       // Initialize the assistant
       this.state.setStatusMessage('Create Assistant...');
-      const assistantId = await initializeAssistant(assistantDetails, fileId);
+      const assistantId = await initializeAssistant(assistantDetails, fileIds);
       if (assistantId === null) {
         throw new Error('AssistantId is null');
       }

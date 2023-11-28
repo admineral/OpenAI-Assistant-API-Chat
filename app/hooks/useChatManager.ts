@@ -8,10 +8,10 @@ export const useChatManager = (
   setChatManager: Dispatch<SetStateAction<ChatManager | null>>, 
   setIsMessageLoading: Dispatch<SetStateAction<boolean>>,
   setProgress: Dispatch<SetStateAction<number>>,
-  setIsLoadingFirstMessage: Dispatch<SetStateAction<boolean>> // Add this line
+  setIsLoadingFirstMessage: Dispatch<SetStateAction<boolean>> 
 ) => {
   useEffect(() => {
-    const chatManager = ChatManager.getInstance(setChatMessages, setStatusMessage, setProgress, setIsLoadingFirstMessage); // Add setIsLoadingFirstMessage here
+    const chatManager = ChatManager.getInstance(setChatMessages, setStatusMessage, setProgress, setIsLoadingFirstMessage); 
     setChatManager(chatManager);
-  }, [setChatMessages, setStatusMessage, setProgress, setIsLoadingFirstMessage]); // And here
+  }, [setChatMessages, setStatusMessage, setProgress, setIsLoadingFirstMessage]);
 };

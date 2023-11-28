@@ -12,7 +12,7 @@ export const useChatState = () => {
   const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
   const [chatStarted, setChatStarted] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-  const [file, setFile] = useState<File>();
+  const [files, setFiles] = useState<File[]>([]);
   const [threadId, setThreadId] = useState<string | null>(null);
   const [isStartLoading, setStartLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -35,7 +35,7 @@ export const useChatState = () => {
     chatMessages, setChatMessages,
     chatStarted, setChatStarted,
     isButtonDisabled, setIsButtonDisabled,
-    file, setFile,
+    files, setFiles,
     assistantId, setAssistantId,
     threadId, setThreadId,
     isStartLoading, setStartLoading,
