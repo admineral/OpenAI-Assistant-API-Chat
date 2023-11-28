@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import Textarea from 'react-textarea-autosize';
-import { SendIcon, LoadingCircle, DocumentIcon, XIcon } from '../icons';
+import { SendIcon, LoadingCircle, DocumentIcon, XIcon, ImageIcon } from '../icons';
 
 const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disabled, chatStarted, isSending, isLoading, handleChatFilesUpload, chatFileDetails, removeChatFile }) => {
   return (
@@ -9,7 +9,7 @@ const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disab
         <div className="flex flex-wrap items-center space-x-2 mb-2">
           {chatFileDetails.map((file) => (
             <div key={file.name} className="flex items-center space-x-1">
-              <XIcon className="h-3 w-3" />
+              {file.type.startsWith('image') ? <ImageIcon className="h-3 w-3" /> : <DocumentIcon className="h-3 w-3" />}
               <span className="text-xs text-gray-500">{file.name}</span>
               <button
                 type="button"
@@ -17,7 +17,7 @@ const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disab
                 className="text-gray-500 hover:text-gray-700"
                 disabled={isSending}
               >
-                <DocumentIcon className="h-4 w-4 text-gray-500" />
+                <XIcon className="h-4 w-4 text-gray-500" />
               </button>
             </div>
           ))}
@@ -53,6 +53,7 @@ const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disab
             onChange={handleChatFilesUpload}
             disabled={disabled || !chatStarted || isSending}
             multiple
+            accept=".c,.cpp,.csv,.docx,.html,.java,.json,.md,.pdf,.pptx,.txt,.tex,image/jpeg,image/png"
           />
           <label 
             htmlFor="file-upload" 

@@ -86,13 +86,18 @@ export default function Chat() {
 
   const handleChatFilesUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      const fileArray = Array.from(event.target.files).map((file) => ({
+      const newFiles = Array.from(event.target.files);
+      if (chatFileDetails.length + newFiles.length > 10) {
+        alert('You can only upload up to 10 files.');
+        return;
+      }
+      const fileArray = newFiles.map((file) => ({
         name: file.name,
         type: file.type,
         size: file.size,
       }));
-      setChatFileDetails(fileArray);
-      setChatUploadedFiles(Array.from(event.target.files));
+      setChatFileDetails(prevFiles => [...prevFiles, ...fileArray]);
+      setChatUploadedFiles(prevFiles => [...prevFiles, ...newFiles]);
     }
     event.target.value = ''; // Clear the input's value
   };
