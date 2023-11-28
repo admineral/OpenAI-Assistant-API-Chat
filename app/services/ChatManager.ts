@@ -225,11 +225,11 @@ async startAssistantWithId(assistantId: string, initialMessage: string): Promise
 }
 
 // Method to send a message
-async sendMessage(input: string, files: File[]): Promise<void> { // Add a new parameter for the files
+async sendMessage(input: string, files: File[], fileDetails: any[]): Promise<void> { // Add a new parameter for the files
   console.log('Sending message...');
   this.state.setProgress(0);
   this.state.isSending = true; 
-  const newUserMessage = { role: 'user', content: input };
+  const newUserMessage = { role: 'user', content: input, fileDetails: fileDetails };
   this.state.messages = [...this.state.messages, newUserMessage];
   this.state.setChatMessages(this.state.messages);
 

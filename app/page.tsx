@@ -72,7 +72,7 @@ export default function Chat() {
       setChatUploadedFiles([]); // Reset the state after files are uploaded
       setChatFileDetails([]); // Reset the file details state
       try {
-        await chatManager.sendMessage(message, currentFiles); // Send the saved files
+        await chatManager.sendMessage(message, currentFiles, chatFileDetails); // Send the saved files and file details
       } catch (error) {
         console.error('Error sending message:', error);
       } finally {
@@ -114,7 +114,7 @@ export default function Chat() {
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
       <LinkBar />
       {chatHasStarted || assistantId || isLoadingFirstMessage  ? (
-        <MessageList chatMessages={chatMessages} statusMessage={statusMessage} isSending={isSending} progress={progress} isFirstMessage={isLoadingFirstMessage} />
+        <MessageList chatMessages={chatMessages} statusMessage={statusMessage} isSending={isSending} progress={progress} isFirstMessage={isLoadingFirstMessage} fileDetails={chatFileDetails} />
       ) : (
         <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, files, handleFilesChange, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
       )}

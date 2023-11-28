@@ -3,9 +3,10 @@ import clsx from "clsx";
 import { Bot, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { ImageIcon, DocumentIcon } from '../icons';
 
 // Message component to display individual messages
-const Message = ({ message, progress, isFirstMessage }) => {
+const Message = ({ message, progress, isFirstMessage, fileDetails }) => {
   return (
     <div
       className={clsx(
@@ -32,17 +33,27 @@ const Message = ({ message, progress, isFirstMessage }) => {
             </div>
           </>
         ) : (
-          <ReactMarkdown
-            className="prose mt-1 w-full break-words prose-p:leading-relaxed"
-            remarkPlugins={[remarkGfm]}
-            components={{
-              a: (props) => (
-                <a {...props} target="_blank" rel="noopener noreferrer" />
-              ),
-            }}
-          >
-            {message.content}
-          </ReactMarkdown>
+          <div className="flex flex-col w-full">
+            <ReactMarkdown
+              className="prose mt-1 break-words prose-p:leading-relaxed"
+              remarkPlugins={[remarkGfm]}
+              components={{
+                a: (props) => (
+                  <a {...props} target="_blank" rel="noopener noreferrer" />
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {fileDetails && fileDetails.map((file) => (
+                <div key={file.name} className="flex items-center space-x-1">
+                  {file.type.startsWith('image') ? <ImageIcon className="h-3 w-3" /> : <DocumentIcon className="h-3 w-3" />}
+                  <span className="text-xs text-gray-500 truncate w-28 block">{file.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -50,7 +61,7 @@ const Message = ({ message, progress, isFirstMessage }) => {
 };
 
 // MessageList component to display a list of messages
-const MessageList = ({ chatMessages, statusMessage, isSending, progress, isFirstMessage }) => {
+const MessageList = ({ chatMessages, statusMessage, isSending, progress, isFirstMessage, fileDetails }) => {
   let messages = [...chatMessages];
 
   // Add a loading message when the site loads and isFirstMessage is true
@@ -93,7 +104,7 @@ const MessageList = ({ chatMessages, statusMessage, isSending, progress, isFirst
         </div>
       )}
       {messages.map((message, i) => (
-        <Message key={i} message={message} progress={progress} isFirstMessage={isFirstMessage && i === 0} />
+        <Message key={i} message={message} progress={progress} isFirstMessage={isFirstMessage && i === 0} fileDetails={message.fileDetails} />
       ))}
     </>
   );
