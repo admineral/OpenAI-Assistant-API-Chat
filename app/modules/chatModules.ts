@@ -19,11 +19,13 @@ interface Message {
 * Submits a user's message to the chat.
 * @param {string} input - The user's message.
 * @param {string} threadId - The ID of the current chat thread.
+* @param {string[]} fileIds - The IDs of the files to be attached to the message.
 * @returns {Promise<void>} - A promise that resolves when the message is successfully added.
 */
-export const submitUserMessage = async (input: string, threadId: string, setStatusMessage: (message: string) => void): Promise<void> => {
+export const submitUserMessage = async (input: string, threadId: string, setStatusMessage: (message: string) => void, fileIds: string[]): Promise<void> => {
+  console.log('File IDs in submitUserMessage:', fileIds);
   setStatusMessage('Submitting user message...');
-  const message = { input, threadId };
+  const message = { input, threadId, fileIds };
   await addMessage(message);
   setStatusMessage('User message submitted successfully.');
 };

@@ -21,14 +21,16 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    // Extract thread ID and input content from JSON data
+    // Extract thread ID, input content, and fileIds from JSON data
     const data = await req.json();
     const threadId = data.threadId;
     const input = data.input;
+    const fileIds = data.fileIds; // This is the new line
 
-    // Log the received thread ID and input for debugging purposes
+    // Log the received thread ID, input, and fileIds for debugging purposes
     console.log(`inside add_Message -Thread ID: ${threadId}`);
     console.log(`inside add_Message -Input: ${input}`);
+    console.log(`inside add_Message -File IDs: ${fileIds}`); // This is the new line
 
     // Validate the input data
     if (typeof input !== 'string') {
@@ -40,6 +42,7 @@ export async function POST(req: NextRequest) {
       await openai.beta.threads.messages.create(threadId, {
         role: "user",
         content: input,
+        file_ids: fileIds || [], // This is the new line
       });
       console.log("add_Message successfully");
       return NextResponse.json({ message: "Message created successfully" });

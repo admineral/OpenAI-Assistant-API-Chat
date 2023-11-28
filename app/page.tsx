@@ -28,7 +28,8 @@ export default function Chat() {
     isMessageLoading, setIsMessageLoading,
     progress, setProgress, 
     isLoadingFirstMessage,
-    setIsLoadingFirstMessage
+    setIsLoadingFirstMessage,
+    chatUploadedFiles = [], setChatUploadedFiles,
   } = useChatState();
 
 
@@ -69,7 +70,8 @@ export default function Chat() {
     setIsSending(true);
     if (chatManager) {
       try {
-        await chatManager.sendMessage(message);
+        await chatManager.sendMessage(message, chatUploadedFiles); // Pass the uploaded files here
+        setChatUploadedFiles([]); // Reset the state after files are uploaded
       } catch (error) {
         console.error('Error sending message:', error);
       } finally {
@@ -82,6 +84,12 @@ export default function Chat() {
   //This function takes an array of File objects (the files selected by the user) and uses the setFiles function to update the files state.
   const handleFilesChange = (selectedFiles: File[]) => setFiles(selectedFiles);
 
+  const handleChatFilesUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setChatUploadedFiles(Array.from(event.target.files));
+    }
+  };
+
   return (
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
       <LinkBar />
@@ -90,7 +98,7 @@ export default function Chat() {
       ) : (
         <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, files, handleFilesChange, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
       )}
-      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending, isLoading: isMessageLoading}} />
+      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending, isLoading: isMessageLoading, handleChatFilesUpload}} />
     </main>
   );
 }

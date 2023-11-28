@@ -26,6 +26,7 @@ export const useChatState = () => {
   const [isMessageLoading, setIsMessageLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isLoadingFirstMessage, setIsLoadingFirstMessage] = useState(false);
+  const [chatUploadedFiles, setChatUploadedFiles] = useState<File[]>([]);
 
   return {
     assistantName, setAssistantName,
@@ -50,6 +51,7 @@ export const useChatState = () => {
     isMessageLoading, setIsMessageLoading,
     progress, setProgress,
     isLoadingFirstMessage, setIsLoadingFirstMessage,
+    chatUploadedFiles, setChatUploadedFiles,
     
 
   };

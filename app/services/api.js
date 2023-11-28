@@ -126,6 +126,7 @@ export const uploadImageAndGetDescription = async (base64Image) => {
   
   // Adds a message
   export const addMessage = async (data) => {
+    console.log('File IDs in addMessage:', data.fileIds);
     console.log('Adding message...');
     const response = await fetch('/api/addMessage', {
       method: 'POST',

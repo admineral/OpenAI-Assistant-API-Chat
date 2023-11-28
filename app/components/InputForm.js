@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import Textarea from 'react-textarea-autosize';
 import { SendIcon, LoadingCircle } from '../icons'; 
 
-const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disabled, chatStarted, isSending, isLoading }) => {
+const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disabled, chatStarted, isSending, isLoading, handleChatFilesUpload }) => {
   return (
     <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
       <form
@@ -26,9 +26,28 @@ const InputForm = ({ input, setInput, handleFormSubmit, inputRef, formRef, disab
             }
           }}
           spellCheck={false}
-          className="w-full pr-10 focus:outline-none"
-          disabled={disabled}
+          className="w-full pr-20 pl-10 focus:outline-none" 
+          disabled={disabled || !chatStarted}
         />
+        <input
+          type="file"
+          id="file-upload"
+          style={{ display: 'none' }}
+          onChange={handleChatFilesUpload}
+          disabled={disabled || !chatStarted || isSending}
+          multiple
+        />
+        <label 
+          htmlFor="file-upload" 
+          className={clsx(
+            "absolute inset-y-0 left-3 my-auto flex h-8 w-8 items-center justify-center rounded-md transition-all",
+            disabled || !chatStarted || isSending
+              ? "cursor-not-allowed bg-gray-300"
+              : "bg-blue-500 hover:bg-blue-600",
+          )}
+        >
+          <span className="text-white text-lg">+</span>
+        </label>
         <button
           className={clsx(
             "absolute inset-y-0 right-3 my-auto flex h-8 w-8 items-center justify-center rounded-md transition-all",
