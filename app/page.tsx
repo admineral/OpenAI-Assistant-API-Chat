@@ -30,7 +30,10 @@ export default function Chat() {
     isLoadingFirstMessage,
     setIsLoadingFirstMessage,
     chatUploadedFiles = [], setChatUploadedFiles,
+    chatFileDetails, setChatFileDetails,
   } = useChatState();
+
+  
 
 
 
@@ -86,8 +89,18 @@ export default function Chat() {
 
   const handleChatFilesUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
+      const fileArray = Array.from(event.target.files).map((file) => ({
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      }));
+      setChatFileDetails(fileArray);
       setChatUploadedFiles(Array.from(event.target.files));
     }
+  };
+
+  const removeChatFile = (fileName: string) => {
+    setChatFileDetails(chatFileDetails.filter((file) => file.name !== fileName));
   };
 
   return (
@@ -98,7 +111,7 @@ export default function Chat() {
       ) : (
         <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, files, handleFilesChange, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
       )}
-      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending, isLoading: isMessageLoading, handleChatFilesUpload}} />
+      <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending, isLoading: isMessageLoading, handleChatFilesUpload, chatFileDetails, removeChatFile}} />
     </main>
   );
 }
