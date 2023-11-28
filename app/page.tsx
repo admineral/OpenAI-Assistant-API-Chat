@@ -61,24 +61,21 @@ export default function Chat() {
 
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // If a message is being sent, return immediately
     if (isSending) {
       return;
     }
-    // Save the message
     const message = inputmessage;
-    // Clear the input
     setInputmessage('');
-    // Disable sending
     setIsSending(true);
     if (chatManager) {
+      const currentFiles = chatUploadedFiles; // Save current files
+      setChatUploadedFiles([]); // Reset the state after files are uploaded
+      setChatFileDetails([]); // Reset the file details state
       try {
-        await chatManager.sendMessage(message, chatUploadedFiles); // Pass the uploaded files here
-        setChatUploadedFiles([]); // Reset the state after files are uploaded
+        await chatManager.sendMessage(message, currentFiles); // Send the saved files
       } catch (error) {
         console.error('Error sending message:', error);
       } finally {
-        // Enable sending
         setIsSending(false);
       }
     }
@@ -97,10 +94,15 @@ export default function Chat() {
       setChatFileDetails(fileArray);
       setChatUploadedFiles(Array.from(event.target.files));
     }
+    event.target.value = ''; // Clear the input's value
   };
 
   const removeChatFile = (fileName: string) => {
-    setChatFileDetails(chatFileDetails.filter((file) => file.name !== fileName));
+    const updatedFileDetails = chatFileDetails.filter((file) => file.name !== fileName);
+    setChatFileDetails(updatedFileDetails);
+  
+    const updatedUploadedFiles = chatUploadedFiles.filter((file) => file.name !== fileName);
+    setChatUploadedFiles(updatedUploadedFiles);
   };
 
   return (
