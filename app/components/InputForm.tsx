@@ -6,6 +6,12 @@ import { SendIcon, LoadingCircle, DocumentIcon, XIcon, ImageIcon } from '../icon
 import { useContext } from 'react';
 import { ChatStateContext } from '../ChatStateContext';
 
+type ChatFile = {
+  name: string;
+  type: string;
+  size: number;
+};
+
 const InputForm: React.FC = () => {
   const { 
     input, setInput, inputRef, formRef, disabled, chatStarted, isSending, isLoading, 
@@ -55,10 +61,10 @@ const InputForm: React.FC = () => {
   };
 
   const removeChatFile = (fileName: string) => {
-    const updatedFileDetails = chatFileDetails.filter((file) => file.name !== fileName);
+    const updatedFileDetails = chatFileDetails.filter((file: ChatFile) => file.name !== fileName);
     setChatFileDetails(updatedFileDetails);
   
-    const updatedUploadedFiles = chatUploadedFiles.filter((file) => file.name !== fileName);
+    const updatedUploadedFiles = chatUploadedFiles.filter((file: File) => file.name !== fileName);
     setChatUploadedFiles(updatedUploadedFiles);
   };
 
@@ -66,7 +72,7 @@ return (
   <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
     <div className="flex flex-col items-stretch w-full max-w-screen-md">
       <div className="flex flex-wrap items-center space-x-2 mb-2">
-        {chatFileDetails.map((file) => (
+        {chatFileDetails.map((file: ChatFile) => (
           <div key={file.name} className="flex items-center space-x-1">
             {file.type.startsWith('image') ? <ImageIcon className="h-3 w-3" /> : <DocumentIcon className="h-3 w-3" />}
             <span className="text-xs text-gray-500">{file.name}</span>

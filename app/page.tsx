@@ -18,7 +18,10 @@ function ChatContent() {
           <InputForm />
         </>
       ) : (
-        <WelcomeForm />
+        <>
+          <WelcomeForm />
+          <InputForm />
+        </>
       )}
     </main>
   );

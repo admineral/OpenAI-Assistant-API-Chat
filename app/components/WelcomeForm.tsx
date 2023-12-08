@@ -36,7 +36,7 @@ const WelcomeForm: React.FC = () => {
 
   const handleFileIdUpdate = (fileId: string) => {
     console.log("WelcomeForm: New file ID added:", fileId);
-    setFileIds(prevFileIds => [...prevFileIds, fileId]);
+    setFileIds((prevFileIds: string[]) => [...prevFileIds, fileId]);
   };
 
   const handleActiveFileIdsUpdate = (activeFileIds: string[]) => {
@@ -111,7 +111,7 @@ const WelcomeForm: React.FC = () => {
         <button
   type="button"
   onClick={startChatAssistant}
-  disabled={isButtonDisabled || !assistantName || !assistantDescription || fileIds.length === 0|| fileIds.some(fileId => typeof fileId === 'undefined')}
+  disabled={isButtonDisabled || !assistantName || !assistantDescription || fileIds.length === 0 || fileIds.some((fileId: string) => typeof fileId === 'undefined')}
   className="w-full p-2 rounded-md bg-green-500 text-white flex justify-center items-center relative overflow-hidden"
   style={{ 
     position: 'relative', 
