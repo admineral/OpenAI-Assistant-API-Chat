@@ -31,6 +31,7 @@ export default function Chat() {
     setIsLoadingFirstMessage,
     chatUploadedFiles = [], setChatUploadedFiles,
     chatFileDetails, setChatFileDetails,
+    fileIds, setFileIds,
   } = useChatState();
 
   
@@ -46,7 +47,15 @@ export default function Chat() {
     setStartLoading(true);
     if (chatManager) {
       try {
-        await chatManager.startAssistant({ assistantName, assistantModel, assistantDescription }, files, initialThreadMessage);
+        console.log('Starting assistant with the following parameters:');
+        console.log('Assistant Name:', assistantName);
+        console.log('Assistant Model:', assistantModel);
+        console.log('Assistant Description:', assistantDescription);
+        console.log('File IDs:', fileIds);
+        console.log('Initial Thread Message:', initialThreadMessage);
+  
+        await chatManager.startAssistant({ assistantName, assistantModel, assistantDescription }, fileIds, initialThreadMessage);
+        
         console.log('Assistant started:', chatManager.getChatState());
         setChatStarted(true);
       } catch (error) {
@@ -68,9 +77,9 @@ export default function Chat() {
     setInputmessage('');
     setIsSending(true);
     if (chatManager) {
-      const currentFiles = chatUploadedFiles; // Save current files
-      setChatUploadedFiles([]); // Reset the state after files are uploaded
-      setChatFileDetails([]); // Reset the file details state
+      const currentFiles = chatUploadedFiles; 
+      setChatUploadedFiles([]); 
+      setChatFileDetails([]); 
       try {
         await chatManager.sendMessage(message, currentFiles, chatFileDetails); // Send the saved files and file details
       } catch (error) {
@@ -110,13 +119,16 @@ export default function Chat() {
     setChatUploadedFiles(updatedUploadedFiles);
   };
 
+
+
+
   return (
     <main className="flex flex-col items-center justify-between pb-40 bg-space-grey-light">
       <LinkBar />
       {chatHasStarted || assistantId || isLoadingFirstMessage  ? (
         <MessageList chatMessages={chatMessages} statusMessage={statusMessage} isSending={isSending} progress={progress} isFirstMessage={isLoadingFirstMessage} fileDetails={chatFileDetails} />
       ) : (
-        <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, files, handleFilesChange, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage}} />
+        <WelcomeForm {...{assistantName, setAssistantName, assistantDescription, setAssistantDescription, assistantModel, setAssistantModel, startChatAssistant, isButtonDisabled, isStartLoading, statusMessage, fileIds, setFileIds}} />
       )}
       <InputForm {...{input: inputmessage, setInput: setInputmessage, handleFormSubmit, inputRef, formRef, disabled: isButtonDisabled || !chatManager, chatStarted: chatMessages.length > 0, isSending, isLoading: isMessageLoading, handleChatFilesUpload, chatFileDetails, removeChatFile}} />
     </main>
