@@ -1,32 +1,19 @@
-// app/components/InputForm.ts
+// app/components/InputForm.tsx
 
 import clsx from 'clsx';
 import Textarea from 'react-textarea-autosize';
 import { SendIcon, LoadingCircle, DocumentIcon, XIcon, ImageIcon } from '../icons';
+import { useContext } from 'react';
+import { ChatStateContext } from '../ChatStateContext';
 
-interface Props {
-  input: string;
-  setInput: (input: string) => void;
-  inputRef: React.RefObject<HTMLTextAreaElement>;
-  formRef: React.RefObject<HTMLFormElement>;
-  disabled: boolean;
-  chatStarted: boolean;
-  isSending: boolean;
-  isLoading: boolean;
-  chatUploadedFiles: File[];
-  setChatUploadedFiles: (files: File[]) => void;
-  chatFileDetails: { name: string; type: string; size: number }[];
-  setChatFileDetails: (details: { name: string; type: string; size: number }[]) => void;
-  chatManager: any; 
-  setChatStarted: (started: boolean) => void;
-  setChatMessages: (messages: any[]) => void; 
-  setStatusMessage: (message: string) => void;
-  setIsSending: (sending: boolean) => void;
-  setProgress: (progress: number) => void;
-  setIsLoadingFirstMessage: (loading: boolean) => void;
-}
+const InputForm: React.FC = () => {
+  const { 
+    input, setInput, inputRef, formRef, disabled, chatStarted, isSending, isLoading, 
+    chatUploadedFiles, setChatUploadedFiles, chatFileDetails, setChatFileDetails, 
+    chatManager, setChatStarted, setChatMessages, setStatusMessage, setIsSending, 
+    setProgress, setIsLoadingFirstMessage 
+  } = useContext(ChatStateContext);
 
-const InputForm: React.FC<Props> = ({ input, setInput, inputRef, formRef, disabled, chatStarted, isSending, isLoading, chatUploadedFiles, setChatUploadedFiles, chatFileDetails, setChatFileDetails, chatManager, setChatStarted, setChatMessages, setStatusMessage, setIsSending, setProgress, setIsLoadingFirstMessage }) => {
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSending) {

@@ -22,9 +22,16 @@ const openai = new OpenAI({
   export async function POST(req: NextRequest) {
     if (req.method === 'POST') {
       try {
-          const { assistantName, assistantModel, assistantDescription, fileIds } = await req.json();
+        const requestBody = await req.json();
+        console.log('Request Body:', requestBody); // Log the entire request body
+  
+        const { assistantDetails, fileIds } = requestBody;
+        const { name: assistantName, model: assistantModel, description: assistantDescription } = assistantDetails;
   
           // Log the fileIds
+          console.log('Assistant Name:', assistantName);
+          console.log('Assistant Model:', assistantModel);
+          console.log('Assistant Description:', assistantDescription);
           console.log('File IDs:', fileIds);
   
           if (!assistantName || !assistantModel || !assistantDescription) {

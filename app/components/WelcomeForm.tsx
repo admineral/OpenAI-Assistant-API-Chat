@@ -1,39 +1,28 @@
 import { LoadingCircle } from '../icons';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import UploadFiles_Configure from './UploadFiles_Component';
 import { statusToProgress as statusToProgressRecord } from './statusToProgress';
+import { ChatStateContext } from '../ChatStateContext'; // Import the context
 
 const statusToProgress: Record<string, number> = statusToProgressRecord;
 
-interface WelcomeFormProps {
-  assistantName: string;
-  setAssistantName: (name: string) => void;
-  assistantDescription: string;
-  setAssistantDescription: (description: string) => void;
-  assistantModel: string;
-  setAssistantModel: (model: string) => void;
-  startChatAssistant: () => void;
-  isButtonDisabled: boolean;
-  isStartLoading: boolean;
-  statusMessage: string;
-  fileIds: string[];
-  setFileIds: React.Dispatch<React.SetStateAction<string[]>>;
-}
-
-const WelcomeForm: React.FC<WelcomeFormProps> = ({
-  assistantName,
-  setAssistantName,
-  assistantDescription,
-  setAssistantDescription,
-  assistantModel,
-  setAssistantModel,
-  startChatAssistant,
-  isButtonDisabled,
-  isStartLoading,
-  statusMessage,
-  fileIds,
-  setFileIds,
-}) => {
+const WelcomeForm: React.FC = () => {
+  // Use the context
+  const {
+    assistantName,
+    setAssistantName,
+    assistantDescription,
+    setAssistantDescription,
+    assistantModel,
+    setAssistantModel,
+    startChatAssistant,
+    isButtonDisabled,
+    isStartLoading,
+    statusMessage,
+    fileIds,
+    setFileIds,
+  } = useContext(ChatStateContext);
+  
 
   const [lastProgress, setLastProgress] = useState(0);
   const baseStatusMessage = statusMessage.split(' (')[0];
@@ -49,12 +38,10 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
     console.log("WelcomeForm: New file ID added:", fileId);
     setFileIds(prevFileIds => [...prevFileIds, fileId]);
   };
-  
 
   const handleActiveFileIdsUpdate = (activeFileIds: string[]) => {
     setFileIds(activeFileIds);
   };
-  
 
   if (progress === 0 && lastProgress !== 0) {
     progress = lastProgress;
@@ -66,7 +53,7 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
     console.log("Aktive Datei-IDs:", fileIds);
   }, [fileIds]);
 
-
+  
 
   return (
     <div className="border-gray-500 bg-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border-2 sm:w-full">
@@ -79,7 +66,10 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
             type="text"
             placeholder="Assistant Name"
             value={assistantName}
-            onChange={(e) => setAssistantName(e.target.value)}
+            onChange={(e) => {
+              setAssistantName(e.target.value);
+              console.log('assistantName in WelcomeForm:', e.target.value);
+            }}
             required
             className="p-2 border border-gray-200 rounded-md"
           />

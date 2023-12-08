@@ -1,6 +1,9 @@
 // useChatState.ts
-import { useState, useRef } from 'react';
+import { useState, useRef,useEffect } from 'react';
 import ChatManager from '../services/ChatManager';
+import { useChatManager } from './useChatManager';
+import { useStartAssistant } from './useStartAssistant';
+
 
 
 type FileDetail = {
@@ -36,6 +39,42 @@ export const useChatState = () => {
   const [chatUploadedFiles, setChatUploadedFiles] = useState<File[]>([]);
   const [chatFileDetails, setChatFileDetails] = useState<FileDetail[]>([]);
   const [fileIds, setFileIds] = useState<string[]>([]); 
+  const [input, setInput] = useState('');
+  // Initialize chatManager
+  useChatManager(setChatMessages, setStatusMessage, setChatManager, setIsMessageLoading, setProgress, setIsLoadingFirstMessage);
+
+  // Start assistant when assistantId and chatManager are available
+  useStartAssistant(assistantId, chatManager, initialThreadMessage);
+    // Define startChatAssistant function
+    const startChatAssistant = async () => {
+      setIsButtonDisabled(true);
+      setStartLoading(true);
+      if (chatManager) {
+        try {
+          console.log('assistantName before startAssistant:', assistantName);
+          const assistantDetails = {
+            name: assistantName,
+            model: assistantModel,
+            description: assistantDescription
+          };
+          console.log('assistantDetails before startAssistant:', assistantDetails);
+          const fileIdsFromState = fileIds;
+          const initialMessage = initialThreadMessage;
+          await chatManager.startAssistant(assistantDetails, fileIdsFromState, initialMessage);
+          setChatStarted(true); // Set chatHasStarted to true
+        } catch (error) {
+          console.error('Error starting assistant:', error);
+          if (error instanceof Error) setStatusMessage(`Error: ${error.message}`);
+        } finally {
+          setIsButtonDisabled(false);
+          setStartLoading(false);
+        }
+      }
+    };
+      // Log the assistantName whenever it changes
+  useEffect(() => {
+    console.log('assistantName in useChatState:', assistantName);
+  }, [assistantName]);
 
 
   return {
@@ -64,6 +103,8 @@ export const useChatState = () => {
     chatUploadedFiles, setChatUploadedFiles,
     chatFileDetails, setChatFileDetails,
     fileIds, setFileIds,
+    input, setInput,
+    startChatAssistant,
     
 
   };

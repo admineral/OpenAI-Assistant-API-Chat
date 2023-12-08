@@ -1,9 +1,11 @@
 // MessageList.js
+import React, { useContext } from 'react';
 import clsx from "clsx";
 import { Bot, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ImageIcon, DocumentIcon } from '../icons';
+import { ChatStateContext } from '../ChatStateContext';
 
 // Message component to display individual messages
 const Message = ({ message, progress, isFirstMessage, fileDetails }) => {
@@ -61,7 +63,8 @@ const Message = ({ message, progress, isFirstMessage, fileDetails }) => {
 };
 
 // MessageList component to display a list of messages
-const MessageList = ({ chatMessages, statusMessage, isSending, progress, isFirstMessage, fileDetails }) => {
+const MessageList = () => {
+  const { chatMessages, statusMessage, isSending, progress, isFirstMessage, chatFileDetails } = useContext(ChatStateContext);
   let messages = [...chatMessages];
 
   // Add a loading message when the site loads and isFirstMessage is true
@@ -103,7 +106,7 @@ const MessageList = ({ chatMessages, statusMessage, isSending, progress, isFirst
           </div>
         </div>
       )}
-      {messages.map((message, i) => (
+      {chatMessages.map((message, i) => (
         <Message key={i} message={message} progress={progress} isFirstMessage={isFirstMessage && i === 0} fileDetails={message.fileDetails} />
       ))}
     </>

@@ -79,12 +79,8 @@ export const initializeAssistant = async (assistantDetails: AssistantDetails, fi
   console.log('(initialize) -> Assistant Details:', assistantDetails);
   console.log('(initialize) -> File IDs:', fileIds);
 
-  const assistantData: AssistantDataResponse = await createAssistant(
-      assistantDetails.assistantName,
-      assistantDetails.assistantModel,
-      assistantDetails.assistantDescription,
-      fileIds
-  );
+  const assistantData = await createAssistant({ assistantDetails, fileIds });
+  console.log('Assistant Data:', assistantData);
 
   console.log('Assistant created successfully. Assistant ID:', assistantData.assistantId);
   return assistantData.assistantId; 
