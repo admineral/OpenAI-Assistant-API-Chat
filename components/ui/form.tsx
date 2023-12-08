@@ -117,9 +117,8 @@ const FormControl = React.forwardRef<
           : `${formDescriptionId} ${formMessageId}`
       }
       aria-invalid={!!error}
-    >
-      <div {...props} />
-    </Slot>
+      {...props}
+    />
   )
 })
 FormControl.displayName = "FormControl"
