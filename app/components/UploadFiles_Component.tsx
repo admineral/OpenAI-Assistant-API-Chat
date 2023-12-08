@@ -25,20 +25,24 @@ const UploadFiles_Configure: React.FC<UploadFilesProps> = ({ onFileIdUpdate, set
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
     if (!selectedFiles) return;
-
+  
     const originalFiles: File[] = Array.from(selectedFiles);
     originalFiles.forEach(file => {
       const fileData: FileData = { name: file.name, status: 'uploading' };
       setFiles(currentFiles => [...currentFiles, fileData]);
-
+  
       prepareUploadFile(file, setStatusMessage)
         .then(fileId => {
-          setFiles(currentFiles =>
-            currentFiles.map(f =>
-              f.name === fileData.name ? { ...f, fileId, status: 'uploaded' } : f
-            )
-          );
-          onFileIdUpdate(fileId); 
+          if (fileId) {
+            setFiles(currentFiles =>
+              currentFiles.map(f =>
+                f.name === fileData.name ? { ...f, fileId, status: 'uploaded' } : f
+              )
+            );
+            onFileIdUpdate(fileId); 
+          } else {
+            throw new Error('File ID is undefined');
+          }
         })
         .catch(error => {
           console.error('Error uploading file:', error);
@@ -49,7 +53,7 @@ const UploadFiles_Configure: React.FC<UploadFilesProps> = ({ onFileIdUpdate, set
           );
         });
     });
-
+  
     event.target.value = '';
   }, []);
 

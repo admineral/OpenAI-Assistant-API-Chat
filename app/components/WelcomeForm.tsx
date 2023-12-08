@@ -34,11 +34,15 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
   fileIds,
   setFileIds,
 }) => {
+
   const [lastProgress, setLastProgress] = useState(0);
-  const baseStatusMessage = statusMessage.replace(/ \(\d+ seconds elapsed\)$/, '');
-  let progress = 0;
-  if (baseStatusMessage in statusToProgress) {
-    progress = statusToProgress[baseStatusMessage];
+  const baseStatusMessage = statusMessage.split(' (')[0];
+  let progress = statusToProgress[baseStatusMessage] || 0;
+
+  if (progress === 0 && lastProgress !== 0) {
+    progress = lastProgress;
+  } else if (progress !== lastProgress) {
+    setLastProgress(progress);
   }
 
   const handleFileIdUpdate = (fileId: string) => {
@@ -46,12 +50,12 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
     setFileIds(prevFileIds => [...prevFileIds, fileId]);
   };
   
+
   const handleActiveFileIdsUpdate = (activeFileIds: string[]) => {
     setFileIds(activeFileIds);
   };
   
-  // If the current progress is 0 and the last progress is not 0,
-  // use the last progress value
+
   if (progress === 0 && lastProgress !== 0) {
     progress = lastProgress;
   } else if (progress !== lastProgress) {
@@ -61,6 +65,8 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
   useEffect(() => {
     console.log("Aktive Datei-IDs:", fileIds);
   }, [fileIds]);
+
+
 
   return (
     <div className="border-gray-500 bg-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border-2 sm:w-full">
@@ -112,23 +118,35 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
         </div>
         {/* Start button in its own container */}
         <div className="flex justify-center p-4">
-          <button
-            type="button"
-            onClick={startChatAssistant}
-            disabled={isButtonDisabled || !assistantName || !assistantDescription || fileIds.length === 0}
-            className="w-full p-2 rounded-md bg-green-500 text-white flex justify-center items-center relative overflow-hidden"
-            style={{ 
-              position: 'relative', 
-              opacity: isButtonDisabled ? 0.5 : 1,
-            }}
-          >
-            {isStartLoading ? (
-              <div className="flex flex-col items-center space-y-2">
-                <LoadingCircle />
-                <p className="text-sm text-gray-700">{statusMessage}</p>
-              </div>
-            ) : "Start"}
-          </button>
+        <button
+  type="button"
+  onClick={startChatAssistant}
+  disabled={isButtonDisabled || !assistantName || !assistantDescription || fileIds.length === 0|| fileIds.some(fileId => typeof fileId === 'undefined')}
+  className="w-full p-2 rounded-md bg-green-500 text-white flex justify-center items-center relative overflow-hidden"
+  style={{ 
+    position: 'relative', 
+    opacity: isButtonDisabled ? 0.5 : 1,
+  }}
+>
+  {isStartLoading && (
+    <div 
+      style={{ 
+        position: 'absolute', 
+        left: 0, 
+        top: 0, 
+        height: '100%', 
+        width: `${progress}%`, 
+        background: 'rgba(0, 0, 0, 0.2)' 
+      }} 
+    />
+  )}
+  {isStartLoading ? (
+    <div className="flex flex-col items-center space-y-2">
+      <LoadingCircle />
+      <p className="text-sm text-gray-700">{statusMessage}</p>
+    </div>
+  ) : "Start"}
+</button>
         </div>
       </div>
     </div>
