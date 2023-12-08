@@ -141,7 +141,7 @@ export const uploadImageAndGetDescription = async (base64Image) => {
     return await response.json();
   };
 
-// Deletes a file
+  // Deletes a file
   export const deleteFile = async (fileId) => {
     console.log(`Deleting file with ID: ${fileId}...`);
     const response = await fetch(`/api/deleteFile`, {

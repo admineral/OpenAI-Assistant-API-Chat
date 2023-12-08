@@ -35,6 +35,7 @@ export const useChatState = () => {
   const [isLoadingFirstMessage, setIsLoadingFirstMessage] = useState(false);
   const [chatUploadedFiles, setChatUploadedFiles] = useState<File[]>([]);
   const [chatFileDetails, setChatFileDetails] = useState<FileDetail[]>([]);
+  const [fileIds, setFileIds] = useState<string[]>([]); 
 
 
   return {
@@ -62,6 +63,7 @@ export const useChatState = () => {
     isLoadingFirstMessage, setIsLoadingFirstMessage,
     chatUploadedFiles, setChatUploadedFiles,
     chatFileDetails, setChatFileDetails,
+    fileIds, setFileIds,
     
 
   };

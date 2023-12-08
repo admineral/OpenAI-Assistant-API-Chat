@@ -1,6 +1,6 @@
 import { LoadingCircle } from '../icons';
-import React, { useState,useEffect } from 'react';
-import UploadFiles_Configure from './UploadFiles_Configure';
+import React, { useState, useEffect } from 'react';
+import UploadFiles_Configure from './UploadFiles_Component';
 import { statusToProgress as statusToProgressRecord } from './statusToProgress';
 
 const statusToProgress: Record<string, number> = statusToProgressRecord;
@@ -12,32 +12,27 @@ interface WelcomeFormProps {
   setAssistantDescription: (description: string) => void;
   assistantModel: string;
   setAssistantModel: (model: string) => void;
-  files: File[];
-  handleFilesChange: (files: File[]) => void;
   startChatAssistant: () => void;
   isButtonDisabled: boolean;
   isStartLoading: boolean;
   statusMessage: string;
+  fileIds: string[];
+  setFileIds: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-
-
-
 const WelcomeForm: React.FC<WelcomeFormProps> = ({
-
-
   assistantName,
   setAssistantName,
   assistantDescription,
   setAssistantDescription,
   assistantModel,
   setAssistantModel,
-  files,
-  handleFilesChange,
   startChatAssistant,
   isButtonDisabled,
   isStartLoading,
   statusMessage,
+  fileIds,
+  setFileIds,
 }) => {
   const [lastProgress, setLastProgress] = useState(0);
   const baseStatusMessage = statusMessage.replace(/ \(\d+ seconds elapsed\)$/, '');
@@ -46,18 +41,12 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
     progress = statusToProgress[baseStatusMessage];
   }
 
-  const [fileIds, setFileIds] = useState<string[]>([]);
-  
-
-
-
   const handleFileIdUpdate = (fileId: string) => {
     console.log("WelcomeForm: New file ID added:", fileId);
-    setFileIds(currentFileIds => [...currentFileIds, fileId]);
+    setFileIds(prevFileIds => [...prevFileIds, fileId]);
   };
   
-  
-  const handleActiveFileIdsUpdate = (activeFileIds: React.SetStateAction<string[]>) => {
+  const handleActiveFileIdsUpdate = (activeFileIds: string[]) => {
     setFileIds(activeFileIds);
   };
   
@@ -73,7 +62,6 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
     console.log("Aktive Datei-IDs:", fileIds);
   }, [fileIds]);
 
-  
   return (
     <div className="border-gray-500 bg-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border-2 sm:w-full">
       <div className="flex flex-col space-y-4 p-7 sm:p-10">
@@ -120,8 +108,6 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
           <UploadFiles_Configure 
             onFileIdUpdate={handleFileIdUpdate} 
             setActiveFileIds={handleActiveFileIdsUpdate} 
-            files={files}
-            setFiles={handleFilesChange}
           />
         </div>
         {/* Start button in its own container */}
@@ -129,7 +115,7 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
           <button
             type="button"
             onClick={startChatAssistant}
-            disabled={isButtonDisabled || !assistantName || !assistantDescription || files.length === 0}
+            disabled={isButtonDisabled || !assistantName || !assistantDescription || fileIds.length === 0}
             className="w-full p-2 rounded-md bg-green-500 text-white flex justify-center items-center relative overflow-hidden"
             style={{ 
               position: 'relative', 

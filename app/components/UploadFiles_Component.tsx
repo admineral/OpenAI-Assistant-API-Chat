@@ -1,11 +1,10 @@
-// my-app/app/GPT_Builder_components/Left_Side/Configure/Upload_Left/UploadFiles_2.tsx
+// app/components/UploadFiles_Configure.tsx
 import { prepareUploadFile, deleteUploadedFile } from '../modules/assistantModules';
 import React, { useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import {Tooltip,TooltipContent,TooltipProvider,TooltipTrigger,} from "@/components/ui/tooltip";
 import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
 
 // Define the structure of the file data
 interface FileData {
@@ -15,13 +14,13 @@ interface FileData {
 }
 
 interface UploadFilesProps {
-  files: FileData[];
-  setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
   onFileIdUpdate: (fileId: string) => void;
-  setActiveFileIds: React.Dispatch<React.SetStateAction<string[]>>; 
+  setActiveFileIds: (activeFileIds: string[]) => void; 
 }
 
-const UploadFiles_Configure: React.FC<UploadFilesProps> = ({ files, setFiles, onFileIdUpdate, setActiveFileIds }) => {  const [statusMessage, setStatusMessage] = useState<string>('');
+const UploadFiles_Configure: React.FC<UploadFilesProps> = ({ onFileIdUpdate, setActiveFileIds }) => {  
+  const [statusMessage, setStatusMessage] = useState<string>('');
+  const [files, setFiles] = useState<FileData[]>([]); // Move files state here
 
   const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = event.target.files;
@@ -61,7 +60,8 @@ const UploadFiles_Configure: React.FC<UploadFilesProps> = ({ files, setFiles, on
     deleteUploadedFile(fileId, setStatusMessage)
       .then(() => {
         setFiles(currentFiles => currentFiles.filter(f => f.fileId !== fileId));
-        setActiveFileIds((prevFileIds) => prevFileIds.filter(id => id !== fileId)); // Add this line
+        const newFileIds = files.filter(f => f.fileId !== fileId).map(f => f.fileId as string);
+        setActiveFileIds(newFileIds);
 
         setStatusMessage(`File deleted successfully.`);
       })
