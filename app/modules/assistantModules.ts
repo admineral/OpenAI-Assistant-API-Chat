@@ -7,6 +7,7 @@ import {
   createAssistant,
   createThread,
   runAssistant,
+  deleteFile,
 } from '../services/api';
 
 interface AssistantDetails {
@@ -119,4 +120,25 @@ export const runChatAssistant = async (assistantId: string, threadId: string): P
 
   console.log('Chat assistant run successfully. Run ID:', runId);
   return runId; 
+};
+
+/**
+* Deletes a file from the chat assistant.
+* @param {string} fileId - The ID of the file to be deleted.
+* @returns {Promise<boolean>} - The status of the deletion.
+*/
+export const deleteUploadedFile = async (fileId: string, setStatusMessage: (message: string) => void): Promise<boolean> => {
+  setStatusMessage(`Gona Deleting file with ID: ${fileId}...`);
+  console.log(`Gonna Deleting file with ID: ${fileId}...`);
+
+  try {
+    const deletionStatus = await deleteFile(fileId);
+    setStatusMessage(`File with ID: ${fileId} deleted successfully.`);
+    console.log(`File with ID: ${fileId} deleted successfully.`);
+    return deletionStatus;
+  } catch (error) {
+    setStatusMessage(`Error deleting file with ID: ${fileId}.`);
+    console.error('Error deleting file:', error);
+    return false;
+  }
 };

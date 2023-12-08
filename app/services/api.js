@@ -140,3 +140,21 @@ export const uploadImageAndGetDescription = async (base64Image) => {
     console.log('Message added successfully');
     return await response.json();
   };
+
+// Deletes a file
+  export const deleteFile = async (fileId) => {
+    console.log(`Deleting file with ID: ${fileId}...`);
+    const response = await fetch(`/api/deleteFile`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileId }),
+    });
+    if (!response.ok) {
+      console.error('File deletion failed with status:', response.status);
+      throw new Error('File deletion failed');
+    }
+    const jsonResponse = await response.json();
+    console.log('Server response:', jsonResponse);
+    console.log('File deleted successfully');
+    return jsonResponse.deleted;
+  };
