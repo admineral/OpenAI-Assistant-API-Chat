@@ -1,15 +1,15 @@
-# Shade UI Components
+# Components Directory
 
-Welcome to the `components` directory of the Shade UI project!
+This directory contains reusable UI components for our application, powered by the Shadcn UI framework.
 
-## Overview
+Shadcn UI is a collection of reusable components built using Radix UI and Tailwind CSS. It provides a set of high-quality, customizable, accessible and adaptable components for building UIs.
 
-This directory contains a collection of reusable UI components designed for the Shade UI framework. Each component is crafted with attention to detail, ensuring accessibility, performance, and ease of use.
+## Structure
 
-## Disclaimer for GitHub Users
+The components are organized as follows:
 
-Please note that the components in this directory are part of a larger Shade UI framework and are intended to be used within the context of this framework. They may have dependencies on other parts of the Shade UI codebase and might not function correctly as standalone elements.
+- `ui`: This subdirectory contains the core UI components like buttons, forms, cards, etc.
 
-## Usage
+- `lib`: This subdirectory contains utility functions and helpers used across different components.
 
-To use these components, you should have a working knowledge of React and the Shade UI framework. These components are designed to be imported and used within your React application.
+

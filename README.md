@@ -12,15 +12,10 @@ Welcome to the OpenAI Assistant API Chat repository! This innovative chat applic
 # [Demo](https://open-ai-assistant-api-chat.vercel.app)
 <img src="Public/File_upload.gif" alt="Agent42" width="600px">
 
-## Newest Features
 
-- **Progress Bar During Chat**: The application now includes a progress bar that provides visual feedback during the chat. This helps users understand the status of the chat and enhances the overall user experience.
+## Beta & Work in Progress
 
-- **Hard Coded Assistant ID**: You can now set a default assistant ID in the`.env` check out the  `.env.example` file. This allows you to specify a default assistant for the chat. If this value is set, the application will use this assistant for the chat. If this value is not set, the application will prompt the user to enter the assistant details. Here's how you can set it:
-
-
-
-
+Please note that this application is currently in the beta phase and is continuously evolving. We are working diligently to enhance the user experience and add new features. During this phase, you may encounter some hiccups or unexpected behavior.
 
 ## Deployment
 
@@ -44,25 +39,17 @@ To deploy the application with both the OpenAI API key and a hardcoded Assistant
 - **Interactive Chat Experience**: Engage in dynamic conversations with the AI assistant.
 - **Robust AI Responses**: Leveraging OpenAI's "gpt-4-1106-preview" model (128k context) for intelligent, context-aware chat responses.
 - **File Upload**: Users can upload files for the assistant to analyze.
-- **Code Interpretation**: (Coming Soon) The assistant can execute Pytho code.
+- **GPT-4 Vision Integration**: Send pictures to the AI, and it will describe what it sees, providing insights and understanding of the visual content.(improoved version soon)
+
+
 - **Function Calls**: (Coming Soon) Experience interactive functionalities such as API calls based on chat context.
-- **GPT-4 Vision Integration**:  
-   - **Image Descriptions**: Send pictures to the AI, and it will describe what it sees, providing insights and understanding of the visual content.
-   - **Optical Character Recognition (OCR)**:(Coming Soon) The AI can analyze text within images, making it possible to read and respond to textual content in photographs or scanned documents.
-
-# Image Upload
-
-<img src="Public/Image_upload.gif" alt="Agent42" width="600px">
-
-#For Developer
-
-[GPT4-Vision api router ](https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/main/app/api/upload_gpt4v/route.ts)
+- **Code Interpretation**: (Coming Soon) The assistant can execute Pytho code.
 
 
 
-## Beta & Work in Progress
 
-Please note that this application is currently in the beta phase and is continuously evolving. We are working diligently to enhance the user experience and add new features. During this phase, you may encounter some hiccups or unexpected behavior.
+
+
 
 
 ## Getting Started
