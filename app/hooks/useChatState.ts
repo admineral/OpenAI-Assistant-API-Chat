@@ -13,7 +13,7 @@ export const useChatState = () => {
   
   
   const [assistantName, setAssistantName] = useState('');
-  const [assistantModel, setAssistantModel] = useState('gpt-3.5-turbo-1106');
+  const [assistantModel, setAssistantModel] = useState('gpt-3.5-turbo-0125');
   const [assistantDescription, setAssistantDescription] = useState('');
   const [inputmessage, setInputmessage] = useState('');
   const [chatMessages, setChatMessages] = useState<{ role: string; content: any; }[]>([]);
