@@ -102,7 +102,7 @@ const WelcomeForm: React.FC<WelcomeFormProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => setAssistantModel('gpt-3.5-turbo-1106')}
+              onClick={() => setAssistantModel('gpt-3.5-turbo-0125')}
               className={`p-1 border border-gray-400 rounded-md ${assistantModel === 'gpt-3.5-turbo-1106' ? 'bg-blue-500 text-white' : ''}`}
             >
               GPT-3.5
