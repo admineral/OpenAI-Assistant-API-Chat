@@ -2,10 +2,14 @@
 
 ########## 90%
 
-Code Refactor 90% Done
+Code Refactor...loading
+
 
 https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/Code_refactor
-[![#Code_refactor_branch]((https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/Code_refactor))
+
+##
+
+[![Branch : Code_refactor]((https://github.com/admineral/OpenAI-Assistant-API-Chat/tree/Code_refactor))
 
 
 
