@@ -12,8 +12,8 @@ RUN apk add tzdata && cp /usr/share/zoneinfo/Europe/Prague /etc/localtime && ech
 
 # Download and update private ca certificates
 RUN apk add curl && \
-    curl -ks 'https://repo.triglav.local/global/openssl/triglav-DC03-CA.crt' -o '/usr/local/share/ca-certificates/triglav-DC03-CA.crt' && \
-    curl -ks 'https://repo.triglav.local/global/openssl/CAdifa.crt' -o '/usr/local/share/ca-certificates/CAdifa.crt' && \
+    curl -ks 'https://repo.difa.cz/global/openssl/triglav-DC03-CA.crt' -o '/usr/local/share/ca-certificates/triglav-DC03-CA.crt' && \
+    curl -ks 'https://repo.difa.cz/global/openssl/CAdifa.crt' -o '/usr/local/share/ca-certificates/CAdifa.crt' && \
     /usr/sbin/update-ca-certificates && \
     apk del curl && \
     rm -rf /var/cache/apk/*
