@@ -1,14 +1,14 @@
-// hooks/useStartAssistant.ts
 import { useEffect } from 'react';
 import ChatManager from '../services/ChatManager';
 
-export const useStartAssistant = (assistantId: string | null, chatManager: ChatManager | null, initialThreadMessage: string) => {
+export const useStartAssistant = (
+  chatManager: ChatManager | null,
+  initialMessage: string,
+  setMessages: (msgs: any[]) => void,
+) => {
   useEffect(() => {
-    if (assistantId && chatManager) {
-      console.log('Assistant ID gefunden:', assistantId);
-      chatManager.startAssistantWithId(assistantId, initialThreadMessage);
-    } else {
-      console.warn('Assistant ID nicht gefunden');
+    if (chatManager && initialMessage) {
+      chatManager.sendMessage(initialMessage, setMessages);
     }
-  }, [assistantId, chatManager, initialThreadMessage]);
+  }, [chatManager, initialMessage, setMessages]);
 };
